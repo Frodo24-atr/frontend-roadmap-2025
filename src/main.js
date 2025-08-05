@@ -677,6 +677,8 @@ class RoadmapApp {
     this.allSkills = this.getAllSkills();
     this.userProfile = this.loadUserProfile();
     this.progressHistory = this.loadProgressHistory();
+    this.goals = this.loadGoals();
+    this.gamificationData = this.loadGamificationData();
     this.init();
   }
 
@@ -686,6 +688,7 @@ class RoadmapApp {
     this.setupEventListeners();
     this.setupFilterListeners();
     this.observeAnimations();
+    this.initializeNotifications();
   }
 
   loadProgress() {
@@ -729,6 +732,33 @@ class RoadmapApp {
   saveProgressHistory() {
     localStorage.setItem('frontend-roadmap-history', 
       JSON.stringify(this.progressHistory));
+  }
+
+  loadGoals() {
+    const saved = localStorage.getItem('frontend-roadmap-goals');
+    return saved ? JSON.parse(saved) : [];
+  }
+
+  saveGoals() {
+    localStorage.setItem('frontend-roadmap-goals', 
+      JSON.stringify(this.goals));
+  }
+
+  loadGamificationData() {
+    const saved = localStorage.getItem('frontend-roadmap-gamification');
+    return saved ? JSON.parse(saved) : {
+      xp: 0,
+      level: 1,
+      badges: [],
+      streak: 0,
+      lastActiveDate: null,
+      totalPoints: 0
+    };
+  }
+
+  saveGamificationData() {
+    localStorage.setItem('frontend-roadmap-gamification', 
+      JSON.stringify(this.gamificationData));
   }
 
   addToHistory(action, skillName = '') {
@@ -783,9 +813,14 @@ class RoadmapApp {
     if (this.completedSkills.has(skillId)) {
       this.completedSkills.delete(skillId);
       this.addToHistory('uncompleted', skillName);
+      // Remove XP for uncompleting
+      this.updateGamification(skill, false);
     } else {
       this.completedSkills.add(skillId);
       this.addToHistory('completed', skillName);
+      // Add XP and check for achievements
+      this.updateGamification(skill, true);
+      this.checkGoalProgress();
     }
     this.saveProgress();
     this.updateProgress();
@@ -927,6 +962,11 @@ class RoadmapApp {
 
     profileBtn?.addEventListener('click', () => {
       this.showProfileModal();
+    });
+
+    const goalsBtn = document.getElementById('goalsBtn');
+    goalsBtn?.addEventListener('click', () => {
+      this.showGoalsModal();
     });
   }
 
@@ -1702,6 +1742,467 @@ class RoadmapApp {
       observer.observe(level);
     });
   }
+
+  // ===========================================
+  // GAMIFICATION SYSTEM
+  // ===========================================
+  updateGamification(skill, completed) {
+    if (!skill) return;
+
+    const xpGain = this.calculateXP(skill);
+    
+    if (completed) {
+      this.gamificationData.xp += xpGain;
+      this.gamificationData.totalPoints += xpGain;
+      this.updateStreak();
+      this.checkLevelUp();
+      this.checkBadges();
+      this.showXPNotification(xpGain, skill.name);
+    } else {
+      this.gamificationData.xp = Math.max(0, this.gamificationData.xp - xpGain);
+      this.gamificationData.totalPoints = Math.max(0, this.gamificationData.totalPoints - xpGain);
+    }
+    
+    this.saveGamificationData();
+  }
+
+  calculateXP(skill) {
+    const baseXP = 10;
+    const difficultyMultiplier = {
+      'beginner': 1,
+      'intermediate': 1.5,
+      'advanced': 2
+    };
+    
+    const timeMultiplier = skill.estimatedHours ? Math.min(skill.estimatedHours / 10, 2) : 1;
+    return Math.round(baseXP * (difficultyMultiplier[skill.difficulty] || 1) * timeMultiplier);
+  }
+
+  updateStreak() {
+    const today = new Date().toDateString();
+    const lastActive = this.gamificationData.lastActiveDate;
+    
+    if (lastActive === today) {
+      // Already active today, streak continues
+      return;
+    }
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (lastActive === yesterday.toDateString()) {
+      // Continue streak
+      this.gamificationData.streak += 1;
+    } else {
+      // Reset streak
+      this.gamificationData.streak = 1;
+    }
+    
+    this.gamificationData.lastActiveDate = today;
+  }
+
+  checkLevelUp() {
+    const newLevel = Math.floor(this.gamificationData.xp / 100) + 1;
+    if (newLevel > this.gamificationData.level) {
+      this.gamificationData.level = newLevel;
+      this.showLevelUpNotification(newLevel);
+    }
+  }
+
+  checkBadges() {
+    const badges = this.getAvailableBadges();
+    badges.forEach(badge => {
+      if (!this.gamificationData.badges.includes(badge.id) && badge.condition()) {
+        this.gamificationData.badges.push(badge.id);
+        this.showBadgeNotification(badge);
+      }
+    });
+  }
+
+  getAvailableBadges() {
+    return [
+      {
+        id: 'first_skill',
+        name: 'Primer Paso',
+        description: 'Completa tu primera skill',
+        icon: '🌟',
+        condition: () => this.completedSkills.size >= 1
+      },
+      {
+        id: 'html_master',
+        name: 'Maestro HTML',
+        description: 'Completa todas las skills de HTML',
+        icon: '📄',
+        condition: () => this.isLevelCompleted('beginner', 'html')
+      },
+      {
+        id: 'css_master',
+        name: 'Maestro CSS',
+        description: 'Completa todas las skills de CSS',
+        icon: '🎨',
+        condition: () => this.isLevelCompleted('beginner', 'css')
+      },
+      {
+        id: 'js_master',
+        name: 'Maestro JavaScript',
+        description: 'Completa todas las skills de JavaScript',
+        icon: '⚡',
+        condition: () => this.isLevelCompleted('beginner', 'javascript')
+      },
+      {
+        id: 'streak_7',
+        name: 'Constancia',
+        description: '7 días consecutivos aprendiendo',
+        icon: '🔥',
+        condition: () => this.gamificationData.streak >= 7
+      },
+      {
+        id: 'level_5',
+        name: 'Veterano',
+        description: 'Alcanza el nivel 5',
+        icon: '🏆',
+        condition: () => this.gamificationData.level >= 5
+      },
+      {
+        id: 'speed_demon',
+        name: 'Velocista',
+        description: 'Completa 10 skills en un día',
+        icon: '💨',
+        condition: () => this.getSkillsCompletedToday() >= 10
+      }
+    ];
+  }
+
+  isLevelCompleted(level, category) {
+    const levelData = roadmapData[level];
+    if (!levelData || !levelData.categories[category]) return false;
+    
+    const categorySkills = levelData.categories[category].skills;
+    return categorySkills.every((_, index) => {
+      const skillId = this.generateSkillId(level, category, index);
+      return this.completedSkills.has(skillId);
+    });
+  }
+
+  getSkillsCompletedToday() {
+    const today = new Date().toDateString();
+    return this.progressHistory.filter(entry => 
+      entry.action === 'completed' && 
+      new Date(entry.timestamp).toDateString() === today
+    ).length;
+  }
+
+  showXPNotification(xp, skillName) {
+    this.showNotification(`+${xp} XP`, `🎉 ¡Completaste "${skillName}"!`);
+  }
+
+  showLevelUpNotification(level) {
+    this.showNotification(`¡Nivel ${level}!`, `🚀 ¡Has subido de nivel!`);
+  }
+
+  showBadgeNotification(badge) {
+    this.showNotification(`${badge.icon} ${badge.name}`, `🏅 ¡Nueva insignia desbloqueada!`);
+  }
+
+  showNotification(title, message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification-toast';
+    notification.innerHTML = `
+      <div class="notification-content">
+        <span class="notification-icon">🎉</span>
+        <div>
+          <div style="font-weight: 600;">${title}</div>
+          <div style="font-size: 0.875rem;">${message}</div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    setTimeout(() => {
+      notification.classList.remove('show');
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // ===========================================
+  // GOALS SYSTEM
+  // ===========================================
+  showGoalsModal() {
+    const modalHTML = `
+      <div class="modal-overlay active">
+        <div class="modal goals-modal">
+          <div class="modal__header">
+            <h3 class="modal__title">🎯 Mis Objetivos</h3>
+            <button class="modal__close" aria-label="Cerrar modal">×</button>
+          </div>
+          <div class="modal__content">
+            ${this.renderGamificationHeader()}
+            
+            <div class="profile-section">
+              <h4>📈 Objetivos Activos</h4>
+              <div id="goalsList">
+                ${this.renderGoalsList()}
+              </div>
+              <button class="sync-btn primary" onclick="roadmapApp.showCreateGoalForm()">➕ Crear Nuevo Objetivo</button>
+            </div>
+            
+            <div class="profile-section">
+              <h4>🏅 Insignias</h4>
+              <div class="badges-container">
+                ${this.renderBadges()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    this.currentModal = document.querySelector('.modal-overlay:last-child');
+    document.body.style.overflow = 'hidden';
+  }
+
+  renderGamificationHeader() {
+    const xpForCurrentLevel = (this.gamificationData.level - 1) * 100;
+    const xpForNextLevel = this.gamificationData.level * 100;
+    const xpProgress = ((this.gamificationData.xp - xpForCurrentLevel) / 100) * 100;
+    
+    return `
+      <div class="gamification-header">
+        <div class="xp-system">
+          <div class="level-badge">Nivel ${this.gamificationData.level}</div>
+          <div class="xp-bar">
+            <div class="xp-fill" style="width: ${xpProgress}%"></div>
+          </div>
+          <div style="color: rgba(255,255,255,0.9); font-size: 0.875rem;">
+            ${this.gamificationData.xp} / ${xpForNextLevel} XP
+          </div>
+        </div>
+        
+        <div class="streak-counter">
+          <span>🔥</span>
+          <span class="streak-number">${this.gamificationData.streak}</span>
+          <span>días consecutivos</span>
+        </div>
+      </div>
+    `;
+  }
+
+  renderGoalsList() {
+    if (this.goals.length === 0) {
+      return '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-lg);">No tienes objetivos creados aún</p>';
+    }
+    
+    return this.goals.map(goal => {
+      const progress = this.calculateGoalProgress(goal);
+      const deadline = new Date(goal.deadline);
+      const isOverdue = deadline < new Date() && goal.status !== 'completed';
+      
+      return `
+        <div class="goal-item">
+          <div class="goal-header">
+            <h5 class="goal-title">${goal.title}</h5>
+            <span class="goal-status ${goal.status}">${goal.status === 'active' ? 'Activo' : 'Completado'}</span>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: var(--spacing-sm);">${goal.description}</p>
+          
+          <div class="goal-progress">
+            <div class="goal-progress-bar">
+              <div class="goal-progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <div class="goal-progress-text">${progress}% completado</div>
+          </div>
+          
+          <div class="goal-deadline ${isOverdue ? 'overdue' : ''}">
+            <span>📅</span>
+            <span>Fecha límite: ${deadline.toLocaleDateString()}</span>
+            ${isOverdue ? '<span style="color: var(--error);">⚠️ Vencido</span>' : ''}
+          </div>
+          
+          <div class="goal-actions">
+            <button class="goal-btn secondary" onclick="roadmapApp.editGoal('${goal.id}')">✏️ Editar</button>
+            <button class="goal-btn secondary" onclick="roadmapApp.deleteGoal('${goal.id}')" style="color: var(--error); border-color: var(--error);">🗑️ Eliminar</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderBadges() {
+    const allBadges = this.getAvailableBadges();
+    
+    return allBadges.map(badge => {
+      const earned = this.gamificationData.badges.includes(badge.id);
+      return `
+        <div class="badge ${earned ? 'earned' : ''}">
+          <div class="badge-icon">${earned ? badge.icon : '🔒'}</div>
+          <div class="badge-name">${badge.name}</div>
+          <div class="badge-description">${badge.description}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  createGoal(goalData) {
+    const goal = {
+      id: Date.now().toString(),
+      ...goalData,
+      status: 'active',
+      createdAt: new Date().toISOString()
+    };
+    
+    this.goals.push(goal);
+    this.saveGoals();
+    this.addToHistory('goal_created', goal.title);
+  }
+
+  calculateGoalProgress(goal) {
+    switch (goal.type) {
+      case 'skills_count':
+        return Math.min(100, (this.completedSkills.size / goal.target) * 100);
+      case 'level_completion':
+        const levelProgress = this.getLevelProgress(goal.level);
+        return levelProgress;
+      case 'category_completion':
+        const categorySkills = this.getCategorySkills(goal.level, goal.category);
+        const completedInCategory = categorySkills.filter(skillId => 
+          this.completedSkills.has(skillId)).length;
+        return Math.min(100, (completedInCategory / categorySkills.length) * 100);
+      case 'streak':
+        return Math.min(100, (this.gamificationData.streak / goal.target) * 100);
+      default:
+        return 0;
+    }
+  }
+
+  checkGoalProgress() {
+    this.goals.forEach(goal => {
+      if (goal.status === 'active') {
+        const progress = this.calculateGoalProgress(goal);
+        if (progress >= 100) {
+          goal.status = 'completed';
+          goal.completedAt = new Date().toISOString();
+          this.showNotification(`🎯 ¡Objetivo completado!`, goal.title);
+          this.addToHistory('goal_completed', goal.title);
+        }
+      }
+    });
+    this.saveGoals();
+  }
+
+  getLevelProgress(levelKey) {
+    const levelSkills = this.getLevelSkills(levelKey);
+    const completedInLevel = levelSkills.filter(skillId => 
+      this.completedSkills.has(skillId)).length;
+    return Math.min(100, (completedInLevel / levelSkills.length) * 100);
+  }
+
+  getCategorySkills(level, category) {
+    const skills = [];
+    if (roadmapData[level] && roadmapData[level].categories[category]) {
+      roadmapData[level].categories[category].skills.forEach((_, index) => {
+        skills.push(this.generateSkillId(level, category, index));
+      });
+    }
+    return skills;
+  }
+
+  showCreateGoalForm() {
+    // Implementation for goal creation form would go here
+    // For now, create a sample goal
+    const goalData = {
+      title: 'Completar 50 skills',
+      description: 'Meta de completar 50 habilidades en el roadmap',
+      type: 'skills_count',
+      target: 50,
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
+    };
+    
+    this.createGoal(goalData);
+    this.showGoalsModal(); // Refresh the modal
+  }
+
+  editGoal(goalId) {
+    // Implementation for goal editing would go here
+    console.log('Edit goal:', goalId);
+  }
+
+  deleteGoal(goalId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este objetivo?')) {
+      this.goals = this.goals.filter(goal => goal.id !== goalId);
+      this.saveGoals();
+      this.showGoalsModal(); // Refresh the modal
+    }
+  }
+
+  // ===========================================
+  // PWA NOTIFICATIONS
+  // ===========================================
+  scheduleProgressNotifications() {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      // Notificación diaria para mantener la racha
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(19, 0, 0, 0); // 7 PM del día siguiente
+      
+      const timeUntilNotification = tomorrow.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        this.sendProgressNotification();
+        // Programar para el día siguiente
+        setInterval(() => {
+          this.sendProgressNotification();
+        }, 24 * 60 * 60 * 1000); // Cada 24 horas
+      }, timeUntilNotification);
+    }
+  }
+
+  sendProgressNotification() {
+    const completedToday = this.getSkillsCompletedToday();
+    const totalCompleted = this.completedSkills.size;
+    
+    let message = '';
+    let title = 'Frontend Roadmap 2025';
+    
+    if (completedToday === 0) {
+      message = `¡No olvides mantener tu racha! Tienes ${this.gamificationData.streak} días consecutivos.`;
+      title = '🔥 ¡Mantén tu racha!';
+    } else {
+      message = `¡Excelente! Has completado ${completedToday} skills hoy. Total: ${totalCompleted}`;
+      title = '🎉 ¡Gran progreso!';
+    }
+    
+    new Notification(title, {
+      body: message,
+      icon: '/code.svg',
+      badge: '/vite.svg',
+      vibrate: [200, 100, 200],
+      tag: 'progress-update',
+      renotify: true,
+      data: {
+        url: '/',
+        action: 'open-app'
+      }
+    });
+  }
+
+  // Inicializar notificaciones cuando se carga la app
+  initializeNotifications() {
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        this.scheduleProgressNotifications();
+      } else if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            this.scheduleProgressNotifications();
+          }
+        });
+      }
+    }
+  }
 }
 
 // ===========================================
@@ -1712,6 +2213,70 @@ let roadmapApp;
 document.addEventListener('DOMContentLoaded', () => {
   roadmapApp = new RoadmapApp();
   window.roadmapApp = roadmapApp; // Make it globally accessible
+  
+  // Registrar Service Worker para PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('SW registrado con éxito:', registration.scope);
+          
+          // Solicitar permisos para notificaciones
+          if ('Notification' in window && 'PushManager' in window) {
+            Notification.requestPermission().then(permission => {
+              if (permission === 'granted') {
+                console.log('Permisos de notificación concedidos');
+              }
+            });
+          }
+        })
+        .catch(error => {
+          console.log('SW falló al registrarse:', error);
+        });
+    });
+  }
+  
+  // Detectar instalación de PWA
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Mostrar botón de instalación personalizado
+    const installButton = document.createElement('button');
+    installButton.textContent = '📱 Instalar App';
+    installButton.className = 'sync-btn primary';
+    installButton.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      box-shadow: var(--shadow-lg);
+    `;
+    
+    installButton.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('Usuario instaló la PWA');
+        }
+        deferredPrompt = null;
+        installButton.remove();
+      }
+    });
+    
+    document.body.appendChild(installButton);
+  });
+  
+  // Ocultar botón cuando se instale
+  window.addEventListener('appinstalled', () => {
+    console.log('PWA instalada con éxito');
+    const installButton = document.querySelector('button[textContent="📱 Instalar App"]');
+    if (installButton) {
+      installButton.remove();
+    }
+  });
 });
 
 // ===========================================
