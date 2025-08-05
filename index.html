@@ -27,6 +27,59 @@
 
       <main class="main">
         <div class="container">
+          <!-- Search and Filter Controls -->
+          <div class="filters-section">
+            <div class="search-container">
+              <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="🔍 Buscar skills..."
+                autocomplete="off"
+              >
+            </div>
+            
+            <div class="filters-container">
+              <div class="filter-group">
+                <label for="difficultyFilter" class="filter-label">Dificultad:</label>
+                <select id="difficultyFilter" class="filter-select">
+                  <option value="">Todas</option>
+                  <option value="beginner">Principiante</option>
+                  <option value="intermediate">Intermedio</option>
+                  <option value="advanced">Avanzado</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="statusFilter" class="filter-label">Estado:</label>
+                <select id="statusFilter" class="filter-select">
+                  <option value="">Todos</option>
+                  <option value="completed">Completados</option>
+                  <option value="pending">Pendientes</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="levelFilter" class="filter-label">Nivel:</label>
+                <select id="levelFilter" class="filter-select">
+                  <option value="">Todos los niveles</option>
+                  <option value="beginner">Principiante</option>
+                  <option value="intermediate">Intermedio</option>
+                  <option value="advanced">Avanzado</option>
+                  <option value="senior">Senior</option>
+                </select>
+              </div>
+              
+              <button id="clearFilters" class="clear-filters-btn">
+                🗑️ Limpiar filtros
+              </button>
+            </div>
+            
+            <div class="results-info" id="resultsInfo">
+              <span class="results-count">Mostrando todas las skills</span>
+            </div>
+          </div>
+
           <div class="roadmap" id="roadmap">
             <!-- El roadmap se generará dinámicamente con JavaScript -->
           </div>

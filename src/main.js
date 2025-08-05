@@ -176,27 +176,42 @@ const roadmapData = {
           {
             name: "CSS Grid",
             description: "Domina CSS Grid para layouts complejos bidimensionales y responsive design.",
-            resources: ["Grid Garden Game", "CSS Grid Complete Guide", "Grid vs Flexbox"]
+            resources: ["Grid Garden Game", "CSS Grid Complete Guide", "Grid vs Flexbox"],
+            estimatedHours: 25,
+            difficulty: "intermediate",
+            prerequisites: ["Flexbox básico", "Display y Position"]
           },
           {
             name: "Responsive Design",
             description: "Crea sitios adaptativos con media queries, mobile-first approach y breakpoints.",
-            resources: ["Responsive Design Patterns", "Media Queries", "Mobile First Design"]
+            resources: ["Responsive Design Patterns", "Media Queries", "Mobile First Design"],
+            estimatedHours: 30,
+            difficulty: "intermediate",
+            prerequisites: ["CSS Grid", "Box Model"]
           },
           {
             name: "CSS Custom Properties",
             description: "Utiliza variables CSS para theming dinámico y mantenimiento eficiente.",
-            resources: ["CSS Variables", "Dynamic Theming", "CSS Custom Properties"]
+            resources: ["CSS Variables", "Dynamic Theming", "CSS Custom Properties"],
+            estimatedHours: 15,
+            difficulty: "intermediate",
+            prerequisites: ["Sintaxis y selectores CSS"]
           },
           {
             name: "Animaciones CSS",
             description: "Crea animaciones fluidas con transitions, transforms y keyframes.",
-            resources: ["CSS Animations", "Performance Optimization", "Animation Libraries"]
+            resources: ["CSS Animations", "Performance Optimization", "Animation Libraries"],
+            estimatedHours: 35,
+            difficulty: "intermediate",
+            prerequisites: ["CSS Custom Properties", "Display y Position"]
           },
           {
             name: "Sass/SCSS",
             description: "Aprende preprocesadores CSS para código más mantenible y organizado.",
-            resources: ["Sass Documentation", "SCSS vs Sass", "Sass Best Practices"]
+            resources: ["Sass Documentation", "SCSS vs Sass", "Sass Best Practices"],
+            estimatedHours: 20,
+            difficulty: "intermediate",
+            prerequisites: ["CSS Custom Properties", "Responsive Design"]
           }
         ]
       },
@@ -207,27 +222,42 @@ const roadmapData = {
           {
             name: "ES6+ Features",
             description: "Domina destructuring, spread operator, template literals, modules y más.",
-            resources: ["ES6 Features", "Modern JavaScript", "Module Systems"]
+            resources: ["ES6 Features", "Modern JavaScript", "Module Systems"],
+            estimatedHours: 35,
+            difficulty: "intermediate",
+            prerequisites: ["Funciones básicas", "Condicionales y bucles"]
           },
           {
             name: "Programación Asíncrona",
             description: "Aprende Promises, async/await y manejo de APIs con fetch.",
-            resources: ["Promise Tutorial", "Async/Await Guide", "API Integration"]
+            resources: ["Promise Tutorial", "Async/Await Guide", "API Integration"],
+            estimatedHours: 40,
+            difficulty: "intermediate",
+            prerequisites: ["ES6+ Features", "DOM Manipulation"]
           },
           {
             name: "Array Methods Avanzados",
             description: "Utiliza map, filter, reduce, find y otros métodos funcionales.",
-            resources: ["Functional Programming", "Array Methods", "Data Transformation"]
+            resources: ["Functional Programming", "Array Methods", "Data Transformation"],
+            estimatedHours: 25,
+            difficulty: "intermediate",
+            prerequisites: ["ES6+ Features"]
           },
           {
             name: "OOP en JavaScript",
             description: "Comprende clases, herencia, prototipos y patrones de diseño.",
-            resources: ["JavaScript Classes", "Prototype Chain", "Design Patterns"]
+            resources: ["JavaScript Classes", "Prototype Chain", "Design Patterns"],
+            estimatedHours: 45,
+            difficulty: "intermediate",
+            prerequisites: ["ES6+ Features", "Funciones básicas"]
           },
           {
             name: "Error Handling",
             description: "Implementa manejo robusto de errores con try/catch y debugging avanzado.",
-            resources: ["Error Handling", "Debugging Strategies", "Testing Basics"]
+            resources: ["Error Handling", "Debugging Strategies", "Testing Basics"],
+            estimatedHours: 20,
+            difficulty: "intermediate",
+            prerequisites: ["Programación Asíncrona", "OOP en JavaScript"]
           }
         ]
       },
@@ -238,22 +268,34 @@ const roadmapData = {
           {
             name: "React Fundamentals",
             description: "Aprende componentes, JSX, props, state y hooks básicos (useState, useEffect).",
-            resources: ["React Documentation", "Create React App", "React Hooks"]
+            resources: ["React Documentation", "Create React App", "React Hooks"],
+            estimatedHours: 60,
+            difficulty: "intermediate",
+            prerequisites: ["ES6+ Features", "DOM Manipulation"]
           },
           {
             name: "Vue.js Basics",
             description: "Comprende la sintaxis de Vue, directivas, computed properties y componentes.",
-            resources: ["Vue.js Guide", "Vue CLI", "Composition API"]
+            resources: ["Vue.js Guide", "Vue CLI", "Composition API"],
+            estimatedHours: 50,
+            difficulty: "intermediate",
+            prerequisites: ["ES6+ Features", "DOM Manipulation"]
           },
           {
             name: "State Management",
             description: "Maneja estado global con Context API, Redux o Vuex según el framework.",
-            resources: ["Redux Toolkit", "Context API", "State Patterns"]
+            resources: ["Redux Toolkit", "Context API", "State Patterns"],
+            estimatedHours: 40,
+            difficulty: "advanced",
+            prerequisites: ["React Fundamentals"]
           },
           {
             name: "Router",
             description: "Implementa navegación SPA con React Router o Vue Router.",
-            resources: ["React Router", "Vue Router", "Navigation Patterns"]
+            resources: ["React Router", "Vue Router", "Navigation Patterns"],
+            estimatedHours: 25,
+            difficulty: "intermediate",
+            prerequisites: ["React Fundamentals"]
           }
         ]
       },
@@ -264,22 +306,34 @@ const roadmapData = {
           {
             name: "NPM/Yarn",
             description: "Gestiona dependencias, scripts y packages con npm o yarn.",
-            resources: ["NPM Documentation", "Package.json Guide", "Dependency Management"]
+            resources: ["NPM Documentation", "Package.json Guide", "Dependency Management"],
+            estimatedHours: 15,
+            difficulty: "beginner",
+            prerequisites: ["Git básico"]
           },
           {
             name: "Webpack Basics",
             description: "Configura bundling básico, loaders y plugins esenciales.",
-            resources: ["Webpack Getting Started", "Webpack Config", "Bundle Optimization"]
+            resources: ["Webpack Getting Started", "Webpack Config", "Bundle Optimization"],
+            estimatedHours: 35,
+            difficulty: "intermediate",
+            prerequisites: ["NPM/Yarn", "ES6+ Features"]
           },
           {
             name: "Vite",
             description: "Utiliza Vite para desarrollo rápido y build optimizado.",
-            resources: ["Vite Guide", "Fast Development", "Build Optimization"]
+            resources: ["Vite Guide", "Fast Development", "Build Optimization"],
+            estimatedHours: 20,
+            difficulty: "intermediate",
+            prerequisites: ["NPM/Yarn"]
           },
           {
             name: "ESLint & Prettier",
             description: "Configura linting y formatting automático para código consistente.",
-            resources: ["ESLint Configuration", "Prettier Setup", "Code Quality"]
+            resources: ["ESLint Configuration", "Prettier Setup", "Code Quality"],
+            estimatedHours: 12,
+            difficulty: "beginner",
+            prerequisites: ["NPM/Yarn", "Editor de código"]
           }
         ]
       }
@@ -298,22 +352,34 @@ const roadmapData = {
           {
             name: "Web Vitals",
             description: "Optimiza Core Web Vitals: LCP, FID, CLS para mejor experiencia de usuario.",
-            resources: ["Web Vitals Guide", "Performance Metrics", "Lighthouse Optimization"]
+            resources: ["Web Vitals Guide", "Performance Metrics", "Lighthouse Optimization"],
+            estimatedHours: 30,
+            difficulty: "advanced",
+            prerequisites: ["Webpack Basics", "React Fundamentals"]
           },
           {
             name: "Bundle Optimization",
             description: "Implementa code splitting, tree shaking y lazy loading para reducir bundle size.",
-            resources: ["Code Splitting", "Tree Shaking", "Bundle Analysis"]
+            resources: ["Code Splitting", "Tree Shaking", "Bundle Analysis"],
+            estimatedHours: 40,
+            difficulty: "advanced",
+            prerequisites: ["Webpack Basics", "State Management"]
           },
           {
             name: "Image Optimization",
             description: "Optimiza imágenes con formatos modernos, lazy loading y responsive images.",
-            resources: ["Image Optimization", "WebP Format", "Responsive Images"]
+            resources: ["Image Optimization", "WebP Format", "Responsive Images"],
+            estimatedHours: 25,
+            difficulty: "intermediate",
+            prerequisites: ["Responsive Design", "Web Vitals"]
           },
           {
             name: "Caching Strategies",
             description: "Implementa estrategias de cache: browser cache, CDN, service workers.",
-            resources: ["Caching Strategies", "Service Workers", "PWA Caching"]
+            resources: ["Caching Strategies", "Service Workers", "PWA Caching"],
+            estimatedHours: 45,
+            difficulty: "advanced",
+            prerequisites: ["Web Vitals", "Programación Asíncrona"]
           }
         ]
       },
@@ -324,22 +390,34 @@ const roadmapData = {
           {
             name: "Unit Testing",
             description: "Escribe tests unitarios con Jest, Vitest o herramientas similares.",
-            resources: ["Jest Documentation", "Testing Best Practices", "Test Coverage"]
+            resources: ["Jest Documentation", "Testing Best Practices", "Test Coverage"],
+            estimatedHours: 35,
+            difficulty: "intermediate",
+            prerequisites: ["ES6+ Features", "Error Handling"]
           },
           {
             name: "Integration Testing",
             description: "Implementa tests de integración para componentes y APIs.",
-            resources: ["Integration Testing", "API Testing", "Component Testing"]
+            resources: ["Integration Testing", "API Testing", "Component Testing"],
+            estimatedHours: 40,
+            difficulty: "advanced",
+            prerequisites: ["Unit Testing", "React Fundamentals"]
           },
           {
             name: "E2E Testing",
             description: "Automatiza testing end-to-end con Cypress o Playwright.",
-            resources: ["Cypress Tutorial", "Playwright Guide", "E2E Best Practices"]
+            resources: ["Cypress Tutorial", "Playwright Guide", "E2E Best Practices"],
+            estimatedHours: 50,
+            difficulty: "advanced",
+            prerequisites: ["Integration Testing", "Router"]
           },
           {
             name: "Visual Testing",
             description: "Implementa testing visual para detectar cambios de UI no deseados.",
-            resources: ["Visual Testing", "Storybook", "Screenshot Testing"]
+            resources: ["Visual Testing", "Storybook", "Screenshot Testing"],
+            estimatedHours: 30,
+            difficulty: "advanced",
+            prerequisites: ["Unit Testing", "CSS Grid"]
           }
         ]
       },
@@ -350,22 +428,34 @@ const roadmapData = {
           {
             name: "Design Patterns",
             description: "Aplica patrones como MVC, Observer, Factory en proyectos frontend.",
-            resources: ["Frontend Patterns", "Component Patterns", "State Patterns"]
+            resources: ["Frontend Patterns", "Component Patterns", "State Patterns"],
+            estimatedHours: 50,
+            difficulty: "advanced",
+            prerequisites: ["OOP en JavaScript", "State Management"]
           },
           {
             name: "Micro-frontends",
             description: "Arquitectura de micro-frontends para aplicaciones escalables.",
-            resources: ["Micro-frontend Architecture", "Module Federation", "Scalable Apps"]
+            resources: ["Micro-frontend Architecture", "Module Federation", "Scalable Apps"],
+            estimatedHours: 60,
+            difficulty: "advanced",
+            prerequisites: ["Design Patterns", "Webpack Basics"]
           },
           {
             name: "Monorepos",
             description: "Gestiona proyectos grandes con monorepos usando Lerna, Nx o similares.",
-            resources: ["Monorepo Tools", "Workspace Management", "Shared Libraries"]
+            resources: ["Monorepo Tools", "Workspace Management", "Shared Libraries"],
+            estimatedHours: 40,
+            difficulty: "advanced",
+            prerequisites: ["NPM/Yarn", "Design Patterns"]
           },
           {
             name: "API Design",
             description: "Diseña e integra APIs REST y GraphQL eficientemente.",
-            resources: ["API Best Practices", "GraphQL", "API Integration"]
+            resources: ["API Best Practices", "GraphQL", "API Integration"],
+            estimatedHours: 45,
+            difficulty: "advanced",
+            prerequisites: ["Programación Asíncrona", "Error Handling"]
           }
         ]
       },
@@ -376,22 +466,34 @@ const roadmapData = {
           {
             name: "XSS Prevention",
             description: "Previene ataques XSS con sanitización y Content Security Policy.",
-            resources: ["XSS Prevention", "CSP Implementation", "Security Headers"]
+            resources: ["XSS Prevention", "CSP Implementation", "Security Headers"],
+            estimatedHours: 30,
+            difficulty: "advanced",
+            prerequisites: ["DOM Manipulation", "API Design"]
           },
           {
             name: "Authentication",
             description: "Implementa autenticación segura con JWT, OAuth y mejores prácticas.",
-            resources: ["JWT Implementation", "OAuth Flows", "Auth Security"]
+            resources: ["JWT Implementation", "OAuth Flows", "Auth Security"],
+            estimatedHours: 45,
+            difficulty: "advanced",
+            prerequisites: ["Programación Asíncrona", "State Management"]
           },
           {
             name: "HTTPS & Certificates",
             description: "Configura HTTPS, SSL/TLS y certificados para comunicación segura.",
-            resources: ["HTTPS Setup", "SSL Certificates", "Security Best Practices"]
+            resources: ["HTTPS Setup", "SSL Certificates", "Security Best Practices"],
+            estimatedHours: 25,
+            difficulty: "intermediate",
+            prerequisites: ["API Design"]
           },
           {
             name: "Dependency Security",
             description: "Audita y mantiene dependencias seguras con herramientas de análisis.",
-            resources: ["Dependency Auditing", "Security Scanning", "Vulnerability Management"]
+            resources: ["Dependency Auditing", "Security Scanning", "Vulnerability Management"],
+            estimatedHours: 20,
+            difficulty: "intermediate",
+            prerequisites: ["NPM/Yarn", "ESLint & Prettier"]
           }
         ]
       }
@@ -410,22 +512,34 @@ const roadmapData = {
           {
             name: "Code Review",
             description: "Lidera code reviews efectivos, mentoring y establecimiento de estándares.",
-            resources: ["Code Review Best Practices", "Mentoring Guide", "Technical Standards"]
+            resources: ["Code Review Best Practices", "Mentoring Guide", "Technical Standards"],
+            estimatedHours: 40,
+            difficulty: "advanced",
+            prerequisites: ["Design Patterns", "Unit Testing"]
           },
           {
             name: "Architecture Decisions",
             description: "Toma decisiones arquitectónicas informadas y documenta ADRs.",
-            resources: ["Architecture Decision Records", "Technical Decision Making", "System Design"]
+            resources: ["Architecture Decision Records", "Technical Decision Making", "System Design"],
+            estimatedHours: 60,
+            difficulty: "advanced",
+            prerequisites: ["Micro-frontends", "API Design"]
           },
           {
             name: "Team Collaboration",
             description: "Facilita colaboración efectiva entre equipos frontend, backend y design.",
-            resources: ["Cross-team Collaboration", "Communication Skills", "Agile Practices"]
+            resources: ["Cross-team Collaboration", "Communication Skills", "Agile Practices"],
+            estimatedHours: 35,
+            difficulty: "intermediate",
+            prerequisites: ["Code Review"]
           },
           {
             name: "Knowledge Sharing",
             description: "Establece procesos de documentación y sharing de conocimiento técnico.",
-            resources: ["Documentation Standards", "Knowledge Management", "Tech Talks"]
+            resources: ["Documentation Standards", "Knowledge Management", "Tech Talks"],
+            estimatedHours: 30,
+            difficulty: "intermediate",
+            prerequisites: ["Team Collaboration", "Architecture Decisions"]
           }
         ]
       },
@@ -436,22 +550,34 @@ const roadmapData = {
           {
             name: "CI/CD Pipelines",
             description: "Diseña pipelines de CI/CD para deployment automático y testing.",
-            resources: ["GitHub Actions", "GitLab CI", "Jenkins", "Deployment Automation"]
+            resources: ["GitHub Actions", "GitLab CI", "Jenkins", "Deployment Automation"],
+            estimatedHours: 50,
+            difficulty: "advanced",
+            prerequisites: ["E2E Testing", "Bundle Optimization"]
           },
           {
             name: "Cloud Platforms",
             description: "Deploya aplicaciones en AWS, Azure, GCP con mejores prácticas.",
-            resources: ["AWS Frontend", "Azure Static Apps", "GCP Hosting", "CDN Configuration"]
+            resources: ["AWS Frontend", "Azure Static Apps", "GCP Hosting", "CDN Configuration"],
+            estimatedHours: 60,
+            difficulty: "advanced",
+            prerequisites: ["CI/CD Pipelines", "Caching Strategies"]
           },
           {
             name: "Monitoring & Analytics",
             description: "Implementa monitoring de performance, error tracking y analytics.",
-            resources: ["Error Tracking", "Performance Monitoring", "User Analytics", "Observability"]
+            resources: ["Error Tracking", "Performance Monitoring", "User Analytics", "Observability"],
+            estimatedHours: 40,
+            difficulty: "advanced",
+            prerequisites: ["Web Vitals", "Authentication"]
           },
           {
             name: "Infrastructure as Code",
             description: "Gestiona infraestructura con Terraform, CloudFormation o similares.",
-            resources: ["Terraform", "Infrastructure Automation", "Cloud Architecture"]
+            resources: ["Terraform", "Infrastructure Automation", "Cloud Architecture"],
+            estimatedHours: 55,
+            difficulty: "advanced",
+            prerequisites: ["Cloud Platforms", "Monitoring & Analytics"]
           }
         ]
       },
@@ -462,22 +588,34 @@ const roadmapData = {
           {
             name: "Web Assembly (WASM)",
             description: "Integra WebAssembly para performance crítica y cross-platform code.",
-            resources: ["WebAssembly Tutorial", "WASM Integration", "Performance Optimization"]
+            resources: ["WebAssembly Tutorial", "WASM Integration", "Performance Optimization"],
+            estimatedHours: 70,
+            difficulty: "advanced",
+            prerequisites: ["Bundle Optimization", "Web Vitals"]
           },
           {
             name: "AI/ML Integration",
             description: "Integra modelos de ML en frontend con TensorFlow.js u otras herramientas.",
-            resources: ["TensorFlow.js", "ML in Browser", "AI Integration"]
+            resources: ["TensorFlow.js", "ML in Browser", "AI Integration"],
+            estimatedHours: 80,
+            difficulty: "advanced",
+            prerequisites: ["Web Assembly (WASM)", "Programación Asíncrona"]
           },
           {
             name: "Web3 & Blockchain",
             description: "Desarrolla dApps con Web3.js, ethers.js y wallets integration.",
-            resources: ["Web3 Development", "Ethereum Integration", "DApp Architecture"]
+            resources: ["Web3 Development", "Ethereum Integration", "DApp Architecture"],
+            estimatedHours: 90,
+            difficulty: "advanced",
+            prerequisites: ["Authentication", "API Design"]
           },
           {
             name: "IoT & Edge Computing",
             description: "Conecta aplicaciones web con dispositivos IoT y edge computing.",
-            resources: ["IoT Integration", "Edge Computing", "Real-time Data"]
+            resources: ["IoT Integration", "Edge Computing", "Real-time Data"],
+            estimatedHours: 75,
+            difficulty: "advanced",
+            prerequisites: ["Monitoring & Analytics", "Caching Strategies"]
           }
         ]
       },
@@ -488,22 +626,34 @@ const roadmapData = {
           {
             name: "Technical Strategy",
             description: "Alinea decisiones técnicas con objetivos de negocio y roadmap de producto.",
-            resources: ["Tech Strategy", "Business Alignment", "Product Development"]
+            resources: ["Tech Strategy", "Business Alignment", "Product Development"],
+            estimatedHours: 50,
+            difficulty: "advanced",
+            prerequisites: ["Architecture Decisions", "Knowledge Sharing"]
           },
           {
             name: "Cost Optimization",
             description: "Optimiza costos de infraestructura, desarrollo y mantenimiento.",
-            resources: ["Cost Management", "Resource Optimization", "ROI Analysis"]
+            resources: ["Cost Management", "Resource Optimization", "ROI Analysis"],
+            estimatedHours: 40,
+            difficulty: "intermediate",
+            prerequisites: ["Cloud Platforms", "Infrastructure as Code"]
           },
           {
             name: "Risk Assessment",
             description: "Evalúa riesgos técnicos, dependencias y planes de contingencia.",
-            resources: ["Risk Management", "Technical Debt", "Mitigation Strategies"]
+            resources: ["Risk Management", "Technical Debt", "Mitigation Strategies"],
+            estimatedHours: 35,
+            difficulty: "advanced",
+            prerequisites: ["Technical Strategy", "Dependency Security"]
           },
           {
             name: "Innovation Management",
             description: "Balancea innovación técnica con estabilidad y delivery predecible.",
-            resources: ["Innovation Frameworks", "Technology Adoption", "Change Management"]
+            resources: ["Innovation Frameworks", "Technology Adoption", "Change Management"],
+            estimatedHours: 45,
+            difficulty: "advanced",
+            prerequisites: ["Technical Strategy", "Risk Assessment"]
           }
         ]
       }
@@ -518,6 +668,13 @@ class RoadmapApp {
   constructor() {
     this.completedSkills = this.loadProgress();
     this.currentModal = null;
+    this.filters = {
+      search: '',
+      difficulty: '',
+      status: '',
+      level: ''
+    };
+    this.allSkills = this.getAllSkills();
     this.init();
   }
 
@@ -525,6 +682,7 @@ class RoadmapApp {
     this.renderRoadmap();
     this.updateOverallProgress();
     this.setupEventListeners();
+    this.setupFilterListeners();
     this.observeAnimations();
   }
 
@@ -540,6 +698,25 @@ class RoadmapApp {
 
   generateSkillId(level, category, skillIndex) {
     return `${level}-${category}-${skillIndex}`;
+  }
+
+  getAllSkills() {
+    const skills = [];
+    Object.keys(roadmapData).forEach(levelKey => {
+      const level = roadmapData[levelKey];
+      Object.keys(level.categories).forEach(categoryKey => {
+        level.categories[categoryKey].skills.forEach((skill, index) => {
+          skills.push({
+            ...skill,
+            id: this.generateSkillId(levelKey, categoryKey, index),
+            level: levelKey,
+            category: categoryKey,
+            categoryTitle: level.categories[categoryKey].title
+          });
+        });
+      });
+    });
+    return skills;
   }
 
   isSkillCompleted(skillId) {
@@ -646,6 +823,196 @@ class RoadmapApp {
     return skills;
   }
 
+  // ===========================================
+  // FILTERING AND SEARCH METHODS
+  // ===========================================
+  setupFilterListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const difficultyFilter = document.getElementById('difficultyFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const levelFilter = document.getElementById('levelFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+
+    // Debounce search input
+    let searchTimeout;
+    searchInput?.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        this.filters.search = e.target.value.toLowerCase();
+        this.applyFilters();
+      }, 300);
+    });
+
+    difficultyFilter?.addEventListener('change', (e) => {
+      this.filters.difficulty = e.target.value;
+      this.applyFilters();
+    });
+
+    statusFilter?.addEventListener('change', (e) => {
+      this.filters.status = e.target.value;
+      this.applyFilters();
+    });
+
+    levelFilter?.addEventListener('change', (e) => {
+      this.filters.level = e.target.value;
+      this.applyFilters();
+    });
+
+    clearFiltersBtn?.addEventListener('click', () => {
+      this.clearAllFilters();
+    });
+  }
+
+  applyFilters() {
+    const filteredData = this.getFilteredData();
+    this.renderFilteredRoadmap(filteredData);
+    this.updateResultsInfo(filteredData);
+  }
+
+  getFilteredData() {
+    const filteredData = {};
+    
+    Object.keys(roadmapData).forEach(levelKey => {
+      // Skip level if level filter is active and doesn't match
+      if (this.filters.level && this.filters.level !== levelKey) {
+        return;
+      }
+
+      const level = roadmapData[levelKey];
+      const filteredLevel = {
+        ...level,
+        categories: {}
+      };
+
+      Object.keys(level.categories).forEach(categoryKey => {
+        const category = level.categories[categoryKey];
+        const filteredSkills = category.skills.filter((skill, index) => {
+          const skillId = this.generateSkillId(levelKey, categoryKey, index);
+          
+          // Search filter
+          if (this.filters.search) {
+            const searchLower = this.filters.search;
+            const matchesSearch = 
+              skill.name.toLowerCase().includes(searchLower) ||
+              skill.description.toLowerCase().includes(searchLower) ||
+              category.title.toLowerCase().includes(searchLower);
+            
+            if (!matchesSearch) return false;
+          }
+
+          // Difficulty filter
+          if (this.filters.difficulty && skill.difficulty !== this.filters.difficulty) {
+            return false;
+          }
+
+          // Status filter
+          if (this.filters.status) {
+            const isCompleted = this.isSkillCompleted(skillId);
+            if (this.filters.status === 'completed' && !isCompleted) return false;
+            if (this.filters.status === 'pending' && isCompleted) return false;
+          }
+
+          return true;
+        });
+
+        if (filteredSkills.length > 0) {
+          filteredLevel.categories[categoryKey] = {
+            ...category,
+            skills: filteredSkills
+          };
+        }
+      });
+
+      if (Object.keys(filteredLevel.categories).length > 0) {
+        filteredData[levelKey] = filteredLevel;
+      }
+    });
+
+    return filteredData;
+  }
+
+  renderFilteredRoadmap(filteredData) {
+    const roadmapContainer = document.getElementById('roadmap');
+    roadmapContainer.innerHTML = '';
+
+    if (Object.keys(filteredData).length === 0) {
+      roadmapContainer.innerHTML = `
+        <div class="no-results">
+          <h3>🔍 No se encontraron resultados</h3>
+          <p>Intenta ajustar los filtros o términos de búsqueda</p>
+        </div>
+      `;
+      return;
+    }
+
+    Object.keys(filteredData).forEach(levelKey => {
+      const level = filteredData[levelKey];
+      const levelElement = this.createLevelElement(levelKey, level);
+      roadmapContainer.appendChild(levelElement);
+    });
+
+    // Re-update progress after filtering
+    this.updateLevelProgress();
+  }
+
+  updateResultsInfo(filteredData) {
+    const resultsInfo = document.getElementById('resultsInfo');
+    if (!resultsInfo) return;
+
+    let totalFilteredSkills = 0;
+    Object.values(filteredData).forEach(level => {
+      Object.values(level.categories).forEach(category => {
+        totalFilteredSkills += category.skills.length;
+      });
+    });
+
+    const totalSkills = this.getTotalSkillsCount();
+    const isFiltered = this.filters.search || this.filters.difficulty || 
+                      this.filters.status || this.filters.level;
+
+    if (isFiltered) {
+      resultsInfo.querySelector('.results-count').textContent = 
+        `Mostrando ${totalFilteredSkills} de ${totalSkills} skills`;
+    } else {
+      resultsInfo.querySelector('.results-count').textContent = 
+        'Mostrando todas las skills';
+    }
+  }
+
+  clearAllFilters() {
+    // Reset filters
+    this.filters = {
+      search: '',
+      difficulty: '',
+      status: '',
+      level: ''
+    };
+
+    // Reset form inputs
+    const searchInput = document.getElementById('searchInput');
+    const difficultyFilter = document.getElementById('difficultyFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const levelFilter = document.getElementById('levelFilter');
+
+    if (searchInput) searchInput.value = '';
+    if (difficultyFilter) difficultyFilter.value = '';
+    if (statusFilter) statusFilter.value = '';
+    if (levelFilter) levelFilter.value = '';
+
+    // Re-render full roadmap
+    this.renderRoadmap();
+    this.updateOverallProgress();
+    this.updateLevelProgress();
+    this.updateResultsInfo(roadmapData);
+  }
+
+  highlightSearchTerm(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
   renderRoadmap() {
     const roadmapContainer = document.getElementById('roadmap');
     roadmapContainer.innerHTML = '';
@@ -715,13 +1082,16 @@ class RoadmapApp {
     // Generate time badge
     const timeText = skill.estimatedHours ? `${skill.estimatedHours}h` : '~';
     
+    // Apply search highlighting
+    const highlightedName = this.highlightSearchTerm(skill.name, this.filters.search);
+    
     return `
       <li class="skill-item ${isCompleted ? 'completed' : ''}" data-skill-id="${skillId}">
         <input type="checkbox" 
                class="skill-checkbox" 
                ${isCompleted ? 'checked' : ''}
                data-skill-id="${skillId}">
-        <span class="skill-name">${skill.name}</span>
+        <span class="skill-name">${highlightedName}</span>
         <div class="skill-metadata">
           <span class="skill-badge skill-badge--time">${timeText}</span>
           <span class="skill-badge skill-badge--difficulty ${difficultyClass}">${difficultyText}</span>
