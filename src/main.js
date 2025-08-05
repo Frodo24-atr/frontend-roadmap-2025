@@ -16,22 +16,34 @@ const roadmapData = {
           {
             name: "Estructura básica HTML",
             description: "Aprende la estructura básica de un documento HTML, incluyendo doctype, head, body y elementos esenciales.",
-            resources: ["MDN HTML Basics", "HTML5 Semantic Elements", "Accessibility Guidelines"]
+            resources: ["MDN HTML Basics", "HTML5 Semantic Elements", "Accessibility Guidelines"],
+            estimatedHours: 8,
+            difficulty: "beginner",
+            prerequisites: []
           },
           {
             name: "Elementos semánticos",
             description: "Domina elementos como header, nav, main, section, article, aside, footer para crear código más accesible.",
-            resources: ["Semantic HTML Guide", "ARIA Labels", "Screen Reader Testing"]
+            resources: ["Semantic HTML Guide", "ARIA Labels", "Screen Reader Testing"],
+            estimatedHours: 12,
+            difficulty: "beginner",
+            prerequisites: ["Estructura básica HTML"]
           },
           {
             name: "Formularios HTML",
             description: "Crea formularios accesibles con validation, diferentes tipos de input y mejores prácticas de UX.",
-            resources: ["Form Validation", "Input Types", "Accessibility in Forms"]
+            resources: ["Form Validation", "Input Types", "Accessibility in Forms"],
+            estimatedHours: 16,
+            difficulty: "intermediate",
+            prerequisites: ["Estructura básica HTML", "Elementos semánticos"]
           },
           {
             name: "Tablas y listas",
             description: "Implementa tablas correctamente estructuradas y listas ordenadas/desordenadas.",
-            resources: ["Table Accessibility", "List Semantics", "Data Tables"]
+            resources: ["Table Accessibility", "List Semantics", "Data Tables"],
+            estimatedHours: 6,
+            difficulty: "beginner",
+            prerequisites: ["Elementos semánticos"]
           }
         ]
       },
@@ -42,22 +54,34 @@ const roadmapData = {
           {
             name: "Sintaxis y selectores CSS",
             description: "Comprende la sintaxis CSS, selectores básicos, especificidad y la cascada.",
-            resources: ["CSS Selectors Guide", "Specificity Calculator", "CSS Cascade"]
+            resources: ["CSS Selectors Guide", "Specificity Calculator", "CSS Cascade"],
+            estimatedHours: 10,
+            difficulty: "beginner",
+            prerequisites: ["Estructura básica HTML"]
           },
           {
             name: "Box Model",
             description: "Domina el modelo de caja: margin, border, padding, content y box-sizing.",
-            resources: ["Box Model Visualization", "Box-sizing Explained", "Margin Collapsing"]
+            resources: ["Box Model Visualization", "Box-sizing Explained", "Margin Collapsing"],
+            estimatedHours: 14,
+            difficulty: "beginner",
+            prerequisites: ["Sintaxis y selectores CSS"]
           },
           {
             name: "Display y Position",
             description: "Aprende display (block, inline, inline-block) y position (static, relative, absolute, fixed).",
-            resources: ["CSS Display Property", "CSS Positioning", "Layout Examples"]
+            resources: ["CSS Display Property", "CSS Positioning", "Layout Examples"],
+            estimatedHours: 18,
+            difficulty: "intermediate",
+            prerequisites: ["Box Model"]
           },
           {
             name: "Flexbox básico",
             description: "Introduce layouts flexibles con flexbox para alinear y distribuir elementos.",
-            resources: ["Flexbox Froggy Game", "Complete Flexbox Guide", "Flexbox Patterns"]
+            resources: ["Flexbox Froggy Game", "Complete Flexbox Guide", "Flexbox Patterns"],
+            estimatedHours: 20,
+            difficulty: "intermediate",
+            prerequisites: ["Display y Position"]
           }
         ]
       },
@@ -68,22 +92,34 @@ const roadmapData = {
           {
             name: "Sintaxis y variables",
             description: "Aprende la sintaxis básica, declaración de variables (var, let, const) y tipos de datos.",
-            resources: ["JavaScript Basics", "Variable Declarations", "Data Types"]
+            resources: ["JavaScript Basics", "Variable Declarations", "Data Types"],
+            estimatedHours: 15,
+            difficulty: "beginner",
+            prerequisites: []
           },
           {
             name: "Funciones básicas",
             description: "Crea y utiliza funciones, parámetros, return y scope básico.",
-            resources: ["Function Declarations", "Arrow Functions", "Function Scope"]
+            resources: ["Function Declarations", "Arrow Functions", "Function Scope"],
+            estimatedHours: 20,
+            difficulty: "beginner",
+            prerequisites: ["Sintaxis y variables"]
           },
           {
             name: "DOM Manipulation",
             description: "Manipula el DOM: seleccionar elementos, cambiar contenido y manejar eventos básicos.",
-            resources: ["DOM Methods", "Event Handling", "Dynamic Content"]
+            resources: ["DOM Methods", "Event Handling", "Dynamic Content"],
+            estimatedHours: 25,
+            difficulty: "intermediate",
+            prerequisites: ["Funciones básicas", "Estructura básica HTML"]
           },
           {
             name: "Condicionales y bucles",
             description: "Implementa lógica con if/else, switch, for, while y forEach.",
-            resources: ["Control Flow", "Loop Patterns", "Logical Operators"]
+            resources: ["Control Flow", "Loop Patterns", "Logical Operators"],
+            estimatedHours: 18,
+            difficulty: "beginner",
+            prerequisites: ["Sintaxis y variables"]
           }
         ]
       },
@@ -94,22 +130,34 @@ const roadmapData = {
           {
             name: "Git básico",
             description: "Aprende comandos básicos de Git: clone, add, commit, push, pull.",
-            resources: ["Git Tutorial", "GitHub Desktop", "Git Workflows"]
+            resources: ["Git Tutorial", "GitHub Desktop", "Git Workflows"],
+            estimatedHours: 12,
+            difficulty: "beginner",
+            prerequisites: []
           },
           {
             name: "DevTools navegador",
             description: "Utiliza las herramientas de desarrollo del navegador para debugging y testing.",
-            resources: ["Chrome DevTools", "Firefox DevTools", "Debugging Techniques"]
+            resources: ["Chrome DevTools", "Firefox DevTools", "Debugging Techniques"],
+            estimatedHours: 10,
+            difficulty: "beginner",
+            prerequisites: ["Estructura básica HTML"]
           },
           {
             name: "Editor de código",
             description: "Configura VS Code con extensiones esenciales y shortcuts.",
-            resources: ["VS Code Extensions", "Emmet", "Code Formatting"]
+            resources: ["VS Code Extensions", "Emmet", "Code Formatting"],
+            estimatedHours: 6,
+            difficulty: "beginner",
+            prerequisites: []
           },
           {
             name: "Live Server",
             description: "Configura un servidor local para desarrollo y testing.",
-            resources: ["Live Server Extension", "Local Development", "Browser Sync"]
+            resources: ["Live Server Extension", "Local Development", "Browser Sync"],
+            estimatedHours: 4,
+            difficulty: "beginner",
+            prerequisites: ["Editor de código"]
           }
         ]
       }
@@ -518,13 +566,41 @@ class RoadmapApp {
     const completedCount = this.completedSkills.size;
     const percentage = totalSkills > 0 ? Math.round((completedCount / totalSkills) * 100) : 0;
     
+    // Calculate time statistics
+    const timeStats = this.calculateTimeStatistics();
+    
     const progressFill = document.getElementById('overallProgress');
     const progressText = document.getElementById('progressText');
     
     if (progressFill && progressText) {
       progressFill.style.width = `${percentage}%`;
-      progressText.textContent = `${percentage}% completado (${completedCount}/${totalSkills} skills)`;
+      progressText.innerHTML = `
+        ${percentage}% completado (${completedCount}/${totalSkills} skills)<br>
+        <small style="opacity: 0.8;">⏱️ ${timeStats.completedHours}h completadas de ${timeStats.totalHours}h estimadas</small>
+      `;
     }
+  }
+
+  calculateTimeStatistics() {
+    let totalHours = 0;
+    let completedHours = 0;
+    
+    Object.keys(roadmapData).forEach(levelKey => {
+      const level = roadmapData[levelKey];
+      Object.keys(level.categories).forEach(categoryKey => {
+        level.categories[categoryKey].skills.forEach((skill, index) => {
+          const skillId = this.generateSkillId(levelKey, categoryKey, index);
+          const hours = skill.estimatedHours || 0;
+          totalHours += hours;
+          
+          if (this.completedSkills.has(skillId)) {
+            completedHours += hours;
+          }
+        });
+      });
+    });
+    
+    return { totalHours, completedHours };
   }
 
   updateLevelProgress() {
@@ -632,6 +708,13 @@ class RoadmapApp {
     const skillId = this.generateSkillId(levelKey, categoryKey, index);
     const isCompleted = this.isSkillCompleted(skillId);
     
+    // Generate difficulty badge
+    const difficultyClass = `skill-badge--${skill.difficulty || 'beginner'}`;
+    const difficultyText = skill.difficulty || 'beginner';
+    
+    // Generate time badge
+    const timeText = skill.estimatedHours ? `${skill.estimatedHours}h` : '~';
+    
     return `
       <li class="skill-item ${isCompleted ? 'completed' : ''}" data-skill-id="${skillId}">
         <input type="checkbox" 
@@ -639,6 +722,10 @@ class RoadmapApp {
                ${isCompleted ? 'checked' : ''}
                data-skill-id="${skillId}">
         <span class="skill-name">${skill.name}</span>
+        <div class="skill-metadata">
+          <span class="skill-badge skill-badge--time">${timeText}</span>
+          <span class="skill-badge skill-badge--difficulty ${difficultyClass}">${difficultyText}</span>
+        </div>
         <button class="skill-info" 
                 data-skill='${JSON.stringify(skill)}'
                 aria-label="Más información sobre ${skill.name}">
@@ -692,6 +779,29 @@ class RoadmapApp {
   }
 
   showSkillModal(skill) {
+    // Generate prerequisites HTML
+    const prerequisitesHTML = skill.prerequisites && skill.prerequisites.length > 0 
+      ? `
+        <div class="modal__prerequisites">
+          <h3>📋 Prerequisitos:</h3>
+          <div class="prerequisites-list">
+            ${skill.prerequisites.map(prereq => 
+              `<span class="prerequisite-tag">${prereq}</span>`
+            ).join('')}
+          </div>
+        </div>
+      `
+      : '';
+
+    // Generate metadata
+    const difficultyText = skill.difficulty || 'beginner';
+    const timeText = skill.estimatedHours || 'No especificado';
+    const difficultyIcon = {
+      'beginner': '🌱',
+      'intermediate': '🚀', 
+      'advanced': '💎'
+    }[skill.difficulty] || '🌱';
+
     const modalHTML = `
       <div class="modal-overlay active">
         <div class="modal">
@@ -700,8 +810,22 @@ class RoadmapApp {
             <button class="modal__close" aria-label="Cerrar modal">×</button>
           </div>
           <div class="modal__content">
+            <div class="modal__metadata">
+              <div class="modal__metadata-item">
+                <span class="modal__metadata-icon">⏱️</span>
+                <span><strong>Tiempo estimado:</strong> ${timeText}${skill.estimatedHours ? ' horas' : ''}</span>
+              </div>
+              <div class="modal__metadata-item">
+                <span class="modal__metadata-icon">${difficultyIcon}</span>
+                <span><strong>Dificultad:</strong> ${difficultyText}</span>
+              </div>
+            </div>
+            
             <p>${skill.description}</p>
-            <h3>Recursos recomendados:</h3>
+            
+            ${prerequisitesHTML}
+            
+            <h3>🎯 Recursos recomendados:</h3>
             <ul>
               ${skill.resources.map(resource => `<li>${resource}</li>`).join('')}
             </ul>

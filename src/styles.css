@@ -407,6 +407,69 @@ body {
   opacity: 0.6;
 }
 
+/* ===========================================
+   SKILL METADATA
+=========================================== */
+.skill-metadata {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-left: auto;
+  margin-right: var(--spacing-sm);
+}
+
+.skill-badge {
+  font-size: var(--font-size-xs);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.skill-badge--time {
+  background-color: var(--accent);
+  color: var(--white);
+}
+
+.skill-badge--difficulty {
+  border: 1px solid;
+}
+
+.skill-badge--beginner {
+  background-color: #dcfce7;
+  border-color: var(--success);
+  color: #166534;
+}
+
+.skill-badge--intermediate {
+  background-color: #fef3c7;
+  border-color: var(--accent);
+  color: #92400e;
+}
+
+.skill-badge--advanced {
+  background-color: #dbeafe;
+  border-color: var(--primary);
+  color: #1e40af;
+}
+
+@media (prefers-color-scheme: dark) {
+  .skill-badge--beginner {
+    background-color: #166534;
+    color: #dcfce7;
+  }
+  
+  .skill-badge--intermediate {
+    background-color: #92400e;
+    color: #fef3c7;
+  }
+  
+  .skill-badge--advanced {
+    background-color: #1e40af;
+    color: #dbeafe;
+  }
+}
+
 .skill-info {
   background: none;
   border: none;
@@ -520,6 +583,47 @@ body {
 
 .modal__content li {
   margin: var(--spacing-xs) 0;
+}
+
+.modal__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  background-color: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.modal__metadata-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.modal__metadata-icon {
+  font-size: 1.1em;
+}
+
+.modal__prerequisites {
+  margin: var(--spacing-md) 0;
+}
+
+.prerequisites-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.prerequisite-tag {
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--primary);
+  color: var(--white);
+  border-radius: var(--border-radius);
+  opacity: 0.8;
 }
 
 /* ===========================================
