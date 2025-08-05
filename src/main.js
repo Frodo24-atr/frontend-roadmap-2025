@@ -674,24 +674,44 @@ class AuthManager {
 
   // Inicializar Google Sign-In
   initGoogleAuth() {
+    // Obtener Client ID desde variables de entorno
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+    
     if (typeof google !== 'undefined') {
-      google.accounts.id.initialize({
-        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Reemplazar con tu Client ID real
-        callback: (response) => this.handleGoogleSignIn(response),
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response) => this.handleGoogleSignIn(response),
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          context: 'signin',
+          ux_mode: 'popup',
+          itp_support: true
+        });
 
-      google.accounts.id.renderButton(
-        document.getElementById('google-signin-btn'),
-        { 
-          theme: 'outline', 
-          size: 'large',
-          width: '100%',
-          text: 'signin_with',
-          shape: 'rectangular'
+        // Renderizar botón de Google si existe el contenedor
+        const googleBtnContainer = document.getElementById('google-signin-btn');
+        if (googleBtnContainer) {
+          google.accounts.id.renderButton(
+            googleBtnContainer,
+            { 
+              theme: 'outline', 
+              size: 'large',
+              width: '100%',
+              text: 'signin_with',
+              shape: 'rectangular',
+              logo_alignment: 'left'
+            }
+          );
         }
-      );
+        
+        console.log('Google Auth inicializado correctamente');
+      } catch (error) {
+        console.error('Error al inicializar Google Auth:', error);
+        this.showAuthError('Error al configurar Google Sign-In');
+      }
+    } else {
+      console.warn('Google Auth API no está disponible');
     }
   }
 
@@ -1755,6 +1775,92 @@ class RoadmapApp {
   // Mostrar mensaje de "próximamente"
   showComingSoon(feature) {
     this.showNotification(`${feature} próximamente`, '🚧 Esta función estará disponible pronto');
+  }
+
+  // Verificar si Google está configurado
+  isGoogleConfigured() {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    return clientId && clientId !== 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com' && clientId.includes('.apps.googleusercontent.com');
+  }
+
+  // Mostrar guía de configuración de Google
+  showGoogleSetupGuide() {
+    const guideHTML = `
+      <div class="modal-overlay active">
+        <div class="modal">
+          <div class="modal__header">
+            <h3 class="modal__title">📖 Configurar Google Sign-In</h3>
+            <button class="modal__close" aria-label="Cerrar modal">×</button>
+          </div>
+          <div class="modal__content">
+            <div style="text-align: left;">
+              <h4>🔧 Paso a paso para configurar Google OAuth:</h4>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>1. 🌐 Google Cloud Console</h5>
+                <p>Ve a <a href="https://console.developers.google.com/" target="_blank" style="color: var(--primary);">https://console.developers.google.com/</a></p>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>2. 📁 Crear o seleccionar proyecto</h5>
+                <p>Si no tienes un proyecto, crea uno nuevo llamado "Frontend Roadmap 2025"</p>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>3. 🔑 Habilitar API</h5>
+                <p>Ve a "APIs & Services" → "Library" y habilita "Google+ API"</p>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>4. 🆔 Crear credenciales</h5>
+                <p>Ve a "Credentials" → "Create Credentials" → "OAuth client ID"</p>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>5. ⚙️ Configurar aplicación web</h5>
+                <p>Selecciona "Web application" y agrega estos orígenes autorizados:</p>
+                <code style="display: block; margin: var(--spacing-sm) 0; padding: var(--spacing-xs); background-color: var(--gray-200); border-radius: 4px;">
+                  http://localhost:5173<br>
+                  http://localhost:3000
+                </code>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>6. 📋 Copiar Client ID</h5>
+                <p>Copia el Client ID generado (termina en .apps.googleusercontent.com)</p>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--gray-50); border-radius: var(--border-radius);">
+                <h5>7. ✏️ Editar .env.local</h5>
+                <p>En la raíz del proyecto, edita el archivo <code>.env.local</code> y reemplaza:</p>
+                <code style="display: block; margin: var(--spacing-sm) 0; padding: var(--spacing-xs); background-color: var(--gray-200); border-radius: 4px;">
+                  VITE_GOOGLE_CLIENT_ID=tu_client_id_real_aqui
+                </code>
+              </div>
+              
+              <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-md); background-color: var(--success); color: var(--white); border-radius: var(--border-radius);">
+                <h5>8. 🔄 Reiniciar servidor</h5>
+                <p>Reinicia el servidor de desarrollo (<code>npm run dev</code>) para aplicar los cambios</p>
+              </div>
+              
+              <div class="sync-actions" style="margin-top: var(--spacing-xl);">
+                <button class="sync-btn primary" onclick="roadmapApp.openEnvFile()">📝 Abrir .env.local</button>
+                <button class="sync-btn secondary" onclick="window.open('https://console.developers.google.com/', '_blank')">🌐 Abrir Google Console</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', guideHTML);
+    this.currentModal = document.querySelector('.modal-overlay:last-child');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Abrir archivo .env.local (simulado)
+  openEnvFile() {
+    this.showNotification('Archivo .env.local', '📝 Busca y edita el archivo .env.local en la raíz del proyecto');
   }
 
   // ===========================================
