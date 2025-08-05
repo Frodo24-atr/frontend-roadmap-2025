@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:production": "vite build --mode production",
+    "serve": "vite preview --port 4173",
+    "deploy:preview": "npm run build && npm run serve"
   },
   "devDependencies": {
     "vite": "^7.0.4"

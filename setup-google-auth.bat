@@ -27,6 +27,9 @@ echo 5. 🌍 Selecciona 'Web application'
 echo.
 echo 6. 📝 Configurar Authorized JavaScript origins:
 echo    - http://localhost:5173
+echo    - http://localhost:5174
+echo    - http://localhost:5175
+echo    - http://localhost:5176
 echo    - http://localhost:3000
 echo    - https://tu-dominio-produccion.com (si tienes)
 echo.
@@ -40,6 +43,8 @@ echo    npm run dev
 echo.
 echo ================================================================
 echo 💡 Tip: El Client ID debe terminar en '.apps.googleusercontent.com'
+echo 🚨 Si ves error "no registered origin", agrega el puerto actual
+echo    en Google Cloud Console → Credentials → Edit OAuth Client ID
 echo.
 
 REM Abrir el archivo .env.local para edición

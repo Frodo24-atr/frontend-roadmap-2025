@@ -1,7 +1,7 @@
 // Service Worker para Frontend Roadmap 2025 PWA
-const CACHE_NAME = 'frontend-roadmap-v1.2';
-const STATIC_CACHE = 'static-v1.2';
-const DYNAMIC_CACHE = 'dynamic-v1.2';
+const CACHE_NAME = 'frontend-roadmap-v2.0';
+const STATIC_CACHE = 'static-v2.0';
+const DYNAMIC_CACHE = 'dynamic-v2.0';
 
 const STATIC_ASSETS = [
   '/',
