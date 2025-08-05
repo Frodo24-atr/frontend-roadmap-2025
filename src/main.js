@@ -675,6 +675,8 @@ class RoadmapApp {
       level: ''
     };
     this.allSkills = this.getAllSkills();
+    this.userProfile = this.loadUserProfile();
+    this.progressHistory = this.loadProgressHistory();
     this.init();
   }
 
@@ -691,9 +693,60 @@ class RoadmapApp {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   }
 
+  loadUserProfile() {
+    const saved = localStorage.getItem('frontend-roadmap-profile');
+    return saved ? JSON.parse(saved) : {
+      name: '',
+      email: '',
+      goal: '',
+      targetLevel: 'intermediate',
+      startDate: new Date().toISOString().split('T')[0],
+      avatar: '',
+      bio: '',
+      preferences: {
+        emailNotifications: true,
+        weeklyReports: true,
+        theme: 'auto'
+      }
+    };
+  }
+
+  loadProgressHistory() {
+    const saved = localStorage.getItem('frontend-roadmap-history');
+    return saved ? JSON.parse(saved) : [];
+  }
+
   saveProgress() {
     localStorage.setItem('frontend-roadmap-progress', 
       JSON.stringify([...this.completedSkills]));
+  }
+
+  saveUserProfile() {
+    localStorage.setItem('frontend-roadmap-profile', 
+      JSON.stringify(this.userProfile));
+  }
+
+  saveProgressHistory() {
+    localStorage.setItem('frontend-roadmap-history', 
+      JSON.stringify(this.progressHistory));
+  }
+
+  addToHistory(action, skillName = '') {
+    const historyEntry = {
+      action,
+      skillName,
+      timestamp: new Date().toISOString(),
+      date: new Date().toLocaleDateString('es-ES')
+    };
+    
+    this.progressHistory.unshift(historyEntry);
+    
+    // Keep only last 100 entries
+    if (this.progressHistory.length > 100) {
+      this.progressHistory = this.progressHistory.slice(0, 100);
+    }
+    
+    this.saveProgressHistory();
   }
 
   generateSkillId(level, category, skillIndex) {
@@ -724,13 +777,22 @@ class RoadmapApp {
   }
 
   toggleSkill(skillId) {
+    const skill = this.getSkillById(skillId);
+    const skillName = skill ? skill.name : skillId;
+    
     if (this.completedSkills.has(skillId)) {
       this.completedSkills.delete(skillId);
+      this.addToHistory('uncompleted', skillName);
     } else {
       this.completedSkills.add(skillId);
+      this.addToHistory('completed', skillName);
     }
     this.saveProgress();
     this.updateProgress();
+  }
+
+  getSkillById(skillId) {
+    return this.allSkills.find(skill => skill.id === skillId);
   }
 
   updateProgress() {
@@ -832,6 +894,7 @@ class RoadmapApp {
     const statusFilter = document.getElementById('statusFilter');
     const levelFilter = document.getElementById('levelFilter');
     const clearFiltersBtn = document.getElementById('clearFilters');
+    const profileBtn = document.getElementById('profileBtn');
 
     // Debounce search input
     let searchTimeout;
@@ -860,6 +923,10 @@ class RoadmapApp {
 
     clearFiltersBtn?.addEventListener('click', () => {
       this.clearAllFilters();
+    });
+
+    profileBtn?.addEventListener('click', () => {
+      this.showProfileModal();
     });
   }
 
@@ -1011,6 +1078,408 @@ class RoadmapApp {
     
     const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  // ===========================================
+  // PROFILE & SYNC METHODS
+  // ===========================================
+  showProfileModal() {
+    const stats = this.calculateProfileStats();
+    
+    const modalHTML = `
+      <div class="modal-overlay active">
+        <div class="modal profile-modal">
+          <div class="modal__header">
+            <h3 class="modal__title">👤 Mi Perfil</h3>
+            <button class="modal__close" aria-label="Cerrar modal">×</button>
+          </div>
+          <div class="modal__content">
+            <div class="profile-tabs">
+              <button class="profile-tab active" data-tab="info">📝 Información</button>
+              <button class="profile-tab" data-tab="stats">📊 Estadísticas</button>
+              <button class="profile-tab" data-tab="history">📋 Historial</button>
+              <button class="profile-tab" data-tab="sync">🔄 Sincronización</button>
+            </div>
+            
+            <div class="profile-content active" id="profile-info">
+              <div class="profile-section">
+                <h4>👤 Información Personal</h4>
+                <div class="form-group">
+                  <label class="form-label" for="profileName">Nombre:</label>
+                  <input type="text" id="profileName" class="form-input" value="${this.userProfile.name}" placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profileEmail">Email:</label>
+                  <input type="email" id="profileEmail" class="form-input" value="${this.userProfile.email}" placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profileBio">Bio:</label>
+                  <textarea id="profileBio" class="form-textarea" placeholder="Cuéntanos sobre ti...">${this.userProfile.bio}</textarea>
+                </div>
+              </div>
+              
+              <div class="profile-section">
+                <h4>🎯 Objetivos de Aprendizaje</h4>
+                <div class="form-group">
+                  <label class="form-label" for="profileGoal">Meta Principal:</label>
+                  <input type="text" id="profileGoal" class="form-input" value="${this.userProfile.goal}" placeholder="Ej: Conseguir trabajo como Frontend Developer">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profileTargetLevel">Nivel Objetivo:</label>
+                  <select id="profileTargetLevel" class="form-select">
+                    <option value="beginner" ${this.userProfile.targetLevel === 'beginner' ? 'selected' : ''}>Principiante</option>
+                    <option value="intermediate" ${this.userProfile.targetLevel === 'intermediate' ? 'selected' : ''}>Intermedio</option>
+                    <option value="advanced" ${this.userProfile.targetLevel === 'advanced' ? 'selected' : ''}>Avanzado</option>
+                    <option value="senior" ${this.userProfile.targetLevel === 'senior' ? 'selected' : ''}>Senior</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="profileStartDate">Fecha de Inicio:</label>
+                  <input type="date" id="profileStartDate" class="form-input" value="${this.userProfile.startDate}">
+                </div>
+              </div>
+              
+              <div class="sync-actions">
+                <button class="sync-btn primary" onclick="roadmapApp.saveProfileData()">💾 Guardar Cambios</button>
+              </div>
+            </div>
+            
+            <div class="profile-content" id="profile-stats">
+              <div class="profile-stats">
+                <div class="stat-card">
+                  <span class="stat-value">${stats.totalCompleted}</span>
+                  <span class="stat-label">Skills Completadas</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-value">${stats.totalHours}h</span>
+                  <span class="stat-label">Horas Estudiadas</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-value">${stats.progressPercentage}%</span>
+                  <span class="stat-label">Progreso Total</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-value">${stats.daysActive}</span>
+                  <span class="stat-label">Días Activo</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-value">${stats.currentStreak}</span>
+                  <span class="stat-label">Racha Actual</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-value">${stats.averagePerWeek}</span>
+                  <span class="stat-label">Skills/Semana</span>
+                </div>
+              </div>
+              
+              <div class="profile-section">
+                <h4>📈 Progreso por Nivel</h4>
+                ${this.generateLevelProgress()}
+              </div>
+            </div>
+            
+            <div class="profile-content" id="profile-history">
+              <div class="profile-section">
+                <h4>📋 Historial de Actividad</h4>
+                <div class="history-list">
+                  ${this.generateHistoryList()}
+                </div>
+              </div>
+            </div>
+            
+            <div class="profile-content" id="profile-sync">
+              <div class="profile-section">
+                <h4>💾 Exportar Datos</h4>
+                <div class="sync-actions">
+                  <button class="sync-btn primary" onclick="roadmapApp.exportProgress()">📥 Exportar Progreso (JSON)</button>
+                  <button class="sync-btn secondary" onclick="roadmapApp.exportCSV()">📊 Exportar CSV</button>
+                </div>
+              </div>
+              
+              <div class="profile-section">
+                <h4>📂 Importar Datos</h4>
+                <div class="file-input-wrapper">
+                  <input type="file" id="importFile" class="file-input" accept=".json">
+                  <label for="importFile" class="file-input-label">📁 Seleccionar archivo JSON</label>
+                </div>
+                <div class="sync-actions">
+                  <button class="sync-btn secondary" onclick="roadmapApp.importProgress()">📤 Importar Progreso</button>
+                </div>
+              </div>
+              
+              <div class="profile-section">
+                <h4>🗑️ Gestión de Datos</h4>
+                <div class="sync-actions">
+                  <button class="sync-btn secondary" onclick="roadmapApp.clearAllData()" style="color: var(--error); border-color: var(--error);">🗑️ Borrar Todos los Datos</button>
+                </div>
+                <p style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: var(--spacing-sm);">
+                  ⚠️ Esta acción eliminará todo tu progreso, perfil e historial permanentemente.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    this.currentModal = document.querySelector('.modal-overlay:last-child');
+    document.body.style.overflow = 'hidden';
+    
+    // Setup profile tab listeners
+    this.setupProfileTabListeners();
+  }
+
+  calculateProfileStats() {
+    const timeStats = this.calculateTimeStatistics();
+    const totalSkills = this.getTotalSkillsCount();
+    const progressPercentage = totalSkills > 0 ? Math.round((this.completedSkills.size / totalSkills) * 100) : 0;
+    
+    // Calculate days active (simplified)
+    const startDate = new Date(this.userProfile.startDate);
+    const today = new Date();
+    const daysActive = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)));
+    
+    // Calculate current streak (simplified - based on recent history)
+    const recentHistory = this.progressHistory.slice(0, 7);
+    const currentStreak = recentHistory.filter(entry => entry.action === 'completed').length;
+    
+    // Calculate average per week
+    const weeksActive = Math.max(1, Math.floor(daysActive / 7));
+    const averagePerWeek = Math.round(this.completedSkills.size / weeksActive);
+    
+    return {
+      totalCompleted: this.completedSkills.size,
+      totalHours: timeStats.completedHours,
+      progressPercentage,
+      daysActive,
+      currentStreak,
+      averagePerWeek
+    };
+  }
+
+  generateLevelProgress() {
+    return Object.keys(roadmapData).map(levelKey => {
+      const level = roadmapData[levelKey];
+      const levelSkills = this.getLevelSkills(levelKey);
+      const completedInLevel = levelSkills.filter(skillId => 
+        this.completedSkills.has(skillId)).length;
+      const percentage = levelSkills.length > 0 ? 
+        Math.round((completedInLevel / levelSkills.length) * 100) : 0;
+      
+      return `
+        <div class="stat-card">
+          <span class="stat-value">${percentage}%</span>
+          <span class="stat-label">${level.icon} ${level.title} (${completedInLevel}/${levelSkills.length})</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  generateHistoryList() {
+    if (this.progressHistory.length === 0) {
+      return '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-lg);">No hay actividad registrada aún</p>';
+    }
+    
+    return this.progressHistory.slice(0, 20).map(entry => {
+      const actionText = entry.action === 'completed' ? '✅ Completó' : '❌ Descompletó';
+      const timeAgo = this.getTimeAgo(entry.timestamp);
+      
+      return `
+        <div class="history-item">
+          <span class="history-action">${actionText}: ${entry.skillName}</span>
+          <span class="history-time">${timeAgo}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  getTimeAgo(timestamp) {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffMs = now - past;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffDays > 0) return `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+    if (diffHours > 0) return `hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+    if (diffMinutes > 0) return `hace ${diffMinutes} minuto${diffMinutes > 1 ? 's' : ''}`;
+    return 'hace un momento';
+  }
+
+  setupProfileTabListeners() {
+    const tabs = document.querySelectorAll('.profile-tab');
+    const contents = document.querySelectorAll('.profile-content');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.getAttribute('data-tab');
+        
+        // Update active tab
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Update active content
+        contents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === `profile-${tabName}`) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+  }
+
+  saveProfileData() {
+    this.userProfile.name = document.getElementById('profileName')?.value || '';
+    this.userProfile.email = document.getElementById('profileEmail')?.value || '';
+    this.userProfile.bio = document.getElementById('profileBio')?.value || '';
+    this.userProfile.goal = document.getElementById('profileGoal')?.value || '';
+    this.userProfile.targetLevel = document.getElementById('profileTargetLevel')?.value || 'intermediate';
+    this.userProfile.startDate = document.getElementById('profileStartDate')?.value || '';
+    
+    this.saveUserProfile();
+    this.addToHistory('profile_updated');
+    
+    // Show success message
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = '✅ Guardado!';
+    button.style.backgroundColor = 'var(--success)';
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.backgroundColor = '';
+    }, 2000);
+  }
+
+  // ===========================================
+  // SYNC & EXPORT METHODS
+  // ===========================================
+  exportProgress() {
+    const exportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      userProfile: this.userProfile,
+      completedSkills: [...this.completedSkills],
+      progressHistory: this.progressHistory,
+      metadata: {
+        totalSkills: this.getTotalSkillsCount(),
+        completedCount: this.completedSkills.size,
+        ...this.calculateTimeStatistics()
+      }
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json'
+    });
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `frontend-roadmap-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    this.addToHistory('exported_data');
+  }
+
+  exportCSV() {
+    const headers = ['Skill', 'Category', 'Level', 'Difficulty', 'Estimated Hours', 'Completed', 'Date Completed'];
+    const rows = [headers];
+    
+    this.allSkills.forEach(skill => {
+      const isCompleted = this.completedSkills.has(skill.id);
+      const completedDate = isCompleted ? 
+        this.progressHistory.find(h => h.action === 'completed' && h.skillName === skill.name)?.date || '' : '';
+      
+      rows.push([
+        skill.name,
+        skill.categoryTitle,
+        skill.level,
+        skill.difficulty || 'beginner',
+        skill.estimatedHours || '',
+        isCompleted ? 'Yes' : 'No',
+        completedDate
+      ]);
+    });
+    
+    const csvContent = rows.map(row => 
+      row.map(field => `"${field}"`).join(',')
+    ).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `frontend-roadmap-progress-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    this.addToHistory('exported_csv');
+  }
+
+  importProgress() {
+    const fileInput = document.getElementById('importFile');
+    const file = fileInput?.files[0];
+    
+    if (!file) {
+      alert('Por favor selecciona un archivo JSON primero.');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importData = JSON.parse(e.target.result);
+        
+        if (confirm('¿Estás seguro de que quieres importar estos datos? Esto sobrescribirá tu progreso actual.')) {
+          if (importData.userProfile) {
+            this.userProfile = { ...this.userProfile, ...importData.userProfile };
+            this.saveUserProfile();
+          }
+          
+          if (importData.completedSkills) {
+            this.completedSkills = new Set(importData.completedSkills);
+            this.saveProgress();
+          }
+          
+          if (importData.progressHistory) {
+            this.progressHistory = importData.progressHistory;
+            this.saveProgressHistory();
+          }
+          
+          this.addToHistory('imported_data');
+          this.updateProgress();
+          this.closeModal();
+          
+          alert('¡Datos importados exitosamente!');
+          window.location.reload();
+        }
+      } catch (error) {
+        alert('Error al importar el archivo. Asegúrate de que sea un archivo JSON válido.');
+      }
+    };
+    
+    reader.readAsText(file);
+  }
+
+  clearAllData() {
+    if (confirm('⚠️ ¿Estás COMPLETAMENTE seguro de que quieres borrar TODOS tus datos?\n\nEsto incluye:\n- Todo tu progreso\n- Tu perfil personal\n- Tu historial de actividad\n\nEsta acción NO se puede deshacer.')) {
+      if (confirm('Última confirmación: ¿Realmente quieres borrar todo?')) {
+        localStorage.removeItem('frontend-roadmap-progress');
+        localStorage.removeItem('frontend-roadmap-profile');
+        localStorage.removeItem('frontend-roadmap-history');
+        
+        alert('Todos los datos han sido eliminados. La página se recargará.');
+        window.location.reload();
+      }
+    }
   }
 
   renderRoadmap() {
@@ -1238,8 +1707,11 @@ class RoadmapApp {
 // ===========================================
 // APPLICATION INITIALIZATION
 // ===========================================
+let roadmapApp;
+
 document.addEventListener('DOMContentLoaded', () => {
-  new RoadmapApp();
+  roadmapApp = new RoadmapApp();
+  window.roadmapApp = roadmapApp; // Make it globally accessible
 });
 
 // ===========================================
