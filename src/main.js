@@ -662,6 +662,275 @@ const roadmapData = {
 };
 
 // ===========================================
+// AUTHENTICATION SYSTEM
+// ===========================================
+class AuthManager {
+  constructor() {
+    this.currentUser = null;
+    this.isOnline = navigator.onLine;
+    this.syncQueue = [];
+    this.setupNetworkListeners();
+  }
+
+  // Inicializar Google Sign-In
+  initGoogleAuth() {
+    if (typeof google !== 'undefined') {
+      google.accounts.id.initialize({
+        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Reemplazar con tu Client ID real
+        callback: (response) => this.handleGoogleSignIn(response),
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-btn'),
+        { 
+          theme: 'outline', 
+          size: 'large',
+          width: '100%',
+          text: 'signin_with',
+          shape: 'rectangular'
+        }
+      );
+    }
+  }
+
+  // Manejar respuesta de Google Sign-In
+  async handleGoogleSignIn(response) {
+    try {
+      // Decodificar el JWT token
+      const payload = this.parseJwt(response.credential);
+      
+      const userData = {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+        provider: 'google',
+        verified: payload.email_verified,
+        loginTime: new Date().toISOString()
+      };
+
+      await this.loginUser(userData);
+    } catch (error) {
+      console.error('Error en Google Sign-In:', error);
+      this.showAuthError('Error al iniciar sesión con Google');
+    }
+  }
+
+  // Decodificar JWT token
+  parseJwt(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  }
+
+  // Login de usuario
+  async loginUser(userData) {
+    this.currentUser = userData;
+    this.saveUserSession();
+    
+    // Sincronizar datos si hay conexión
+    if (this.isOnline) {
+      await this.syncUserData();
+    }
+    
+    // Actualizar UI
+    this.updateAuthUI();
+    this.showWelcomeMessage();
+    
+    // Cerrar modal de auth si está abierto
+    roadmapApp.closeModal();
+    
+    // Registrar en historial
+    roadmapApp.addToHistory('user_logged_in', userData.name);
+  }
+
+  // Logout de usuario
+  async logout() {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      // Sincronizar antes de cerrar sesión
+      if (this.isOnline && this.currentUser) {
+        await this.syncUserData();
+      }
+      
+      // Cerrar sesión de Google
+      if (typeof google !== 'undefined') {
+        google.accounts.id.disableAutoSelect();
+      }
+      
+      // Limpiar datos de sesión
+      this.currentUser = null;
+      localStorage.removeItem('user-session');
+      
+      // Actualizar UI
+      this.updateAuthUI();
+      roadmapApp.showNotification('Sesión cerrada', '👋 ¡Hasta pronto!');
+      roadmapApp.addToHistory('user_logged_out');
+    }
+  }
+
+  // Guardar sesión de usuario
+  saveUserSession() {
+    if (this.currentUser) {
+      localStorage.setItem('user-session', JSON.stringify(this.currentUser));
+    }
+  }
+
+  // Cargar sesión de usuario
+  loadUserSession() {
+    const saved = localStorage.getItem('user-session');
+    if (saved) {
+      this.currentUser = JSON.parse(saved);
+      this.updateAuthUI();
+      return true;
+    }
+    return false;
+  }
+
+  // Sincronizar datos del usuario
+  async syncUserData() {
+    if (!this.currentUser || !this.isOnline) return;
+
+    try {
+      // Aquí implementarías la sincronización con tu backend
+      // Por ahora simularemos con localStorage mejorado
+      
+      const syncData = {
+        userId: this.currentUser.id,
+        profile: roadmapApp.userProfile,
+        progress: [...roadmapApp.completedSkills],
+        goals: roadmapApp.goals,
+        gamification: roadmapApp.gamificationData,
+        lastSync: new Date().toISOString()
+      };
+      
+      // Guardar en localStorage con ID de usuario
+      localStorage.setItem(`roadmap-data-${this.currentUser.id}`, JSON.stringify(syncData));
+      
+      this.updateSyncStatus('synced');
+      console.log('Datos sincronizados exitosamente');
+      
+    } catch (error) {
+      console.error('Error al sincronizar:', error);
+      this.updateSyncStatus('error');
+    }
+  }
+
+  // Cargar datos del usuario desde la nube
+  async loadUserData() {
+    if (!this.currentUser) return;
+
+    try {
+      const savedData = localStorage.getItem(`roadmap-data-${this.currentUser.id}`);
+      
+      if (savedData) {
+        const userData = JSON.parse(savedData);
+        
+        // Preguntar si quiere cargar datos de la nube
+        if (confirm('Se encontraron datos guardados en la nube. ¿Quieres cargarlos?')) {
+          roadmapApp.userProfile = { ...roadmapApp.userProfile, ...userData.profile };
+          roadmapApp.completedSkills = new Set(userData.progress || []);
+          roadmapApp.goals = userData.goals || [];
+          roadmapApp.gamificationData = { ...roadmapApp.gamificationData, ...userData.gamification };
+          
+          // Guardar localmente
+          roadmapApp.saveUserProfile();
+          roadmapApp.saveProgress();
+          roadmapApp.saveGoals();
+          roadmapApp.saveGamificationData();
+          
+          // Actualizar UI
+          roadmapApp.updateProgress();
+          roadmapApp.showNotification('Datos cargados', '✅ Progreso sincronizado desde la nube');
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    }
+  }
+
+  // Configurar listeners de red
+  setupNetworkListeners() {
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      this.updateSyncStatus('syncing');
+      if (this.currentUser) {
+        this.syncUserData();
+      }
+    });
+
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      this.updateSyncStatus('offline');
+    });
+  }
+
+  // Actualizar estado de sincronización
+  updateSyncStatus(status) {
+    const indicator = document.querySelector('.sync-indicator');
+    const statusText = document.querySelector('.sync-status span');
+    
+    if (indicator && statusText) {
+      indicator.className = `sync-indicator ${status}`;
+      
+      const statusMessages = {
+        'synced': 'Sincronizado',
+        'syncing': 'Sincronizando...',
+        'error': 'Error de sincronización',
+        'offline': 'Sin conexión'
+      };
+      
+      statusText.textContent = statusMessages[status] || 'Desconocido';
+    }
+  }
+
+  // Actualizar UI de autenticación
+  updateAuthUI() {
+    const profileBtn = document.getElementById('profileBtn');
+    
+    if (this.currentUser) {
+      // Usuario logueado
+      profileBtn.innerHTML = `
+        <img src="${this.currentUser.picture}" alt="Avatar" class="user-avatar" style="width: 24px; height: 24px; margin-right: 8px;">
+        ${this.currentUser.name.split(' ')[0]}
+      `;
+    } else {
+      // Usuario no logueado
+      profileBtn.innerHTML = '👤 Perfil';
+    }
+  }
+
+  // Mostrar mensaje de bienvenida
+  showWelcomeMessage() {
+    if (this.currentUser) {
+      roadmapApp.showNotification(
+        `¡Bienvenido ${this.currentUser.name.split(' ')[0]}!`,
+        '🎉 Tu progreso se sincronizará automáticamente'
+      );
+    }
+  }
+
+  // Mostrar error de autenticación
+  showAuthError(message) {
+    roadmapApp.showNotification('Error de autenticación', `❌ ${message}`);
+  }
+
+  // Verificar si el usuario está logueado
+  isLoggedIn() {
+    return this.currentUser !== null;
+  }
+
+  // Obtener datos del usuario actual
+  getCurrentUser() {
+    return this.currentUser;
+  }
+}
+
+// ===========================================
 // APPLICATION STATE MANAGEMENT
 // ===========================================
 class RoadmapApp {
@@ -679,6 +948,7 @@ class RoadmapApp {
     this.progressHistory = this.loadProgressHistory();
     this.goals = this.loadGoals();
     this.gamificationData = this.loadGamificationData();
+    this.authManager = new AuthManager();
     this.init();
   }
 
@@ -689,6 +959,27 @@ class RoadmapApp {
     this.setupFilterListeners();
     this.observeAnimations();
     this.initializeNotifications();
+    this.initializeAuth();
+  }
+
+  // Inicializar sistema de autenticación
+  initializeAuth() {
+    // Cargar sesión existente
+    this.authManager.loadUserSession();
+    
+    // Inicializar Google Auth cuando esté disponible
+    if (typeof google !== 'undefined') {
+      this.authManager.initGoogleAuth();
+    } else {
+      // Esperar a que se cargue la librería de Google
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (typeof google !== 'undefined') {
+            this.authManager.initGoogleAuth();
+          }
+        }, 1000);
+      });
+    }
   }
 
   loadProgress() {
@@ -1125,6 +1416,58 @@ class RoadmapApp {
   // ===========================================
   showProfileModal() {
     const stats = this.calculateProfileStats();
+    const isLoggedIn = this.authManager.isLoggedIn();
+    const currentUser = this.authManager.getCurrentUser();
+    
+    const authSection = isLoggedIn ? `
+      <div class="user-info">
+        <img src="${currentUser.picture}" alt="Avatar" class="user-avatar">
+        <div class="user-details">
+          <div class="user-name">${currentUser.name}</div>
+          <div class="user-email">${currentUser.email}</div>
+        </div>
+        <button class="logout-btn" onclick="roadmapApp.authManager.logout()">Cerrar Sesión</button>
+      </div>
+      <div class="sync-status">
+        <div class="sync-indicator"></div>
+        <span>Sincronizado</span>
+      </div>
+    ` : `
+      <div class="auth-container">
+        <div class="auth-header">
+          <h3 class="auth-title">🔐 Iniciar Sesión</h3>
+          <p class="auth-subtitle">Sincroniza tu progreso en todos tus dispositivos</p>
+        </div>
+        
+        <div class="auth-form">
+          <div class="social-login">
+            <div id="google-signin-btn"></div>
+            <button class="social-btn github" onclick="roadmapApp.showComingSoon('GitHub')">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12 0 17.31 3.435 21.795 8.205 23.385 8.805 23.49 9.03 23.13 9.03 22.815 9.03 22.53 9.015 21.585 9.015 20.055 5.67 20.76 4.965 18.795 4.965 18.795 4.425 17.46 3.63 17.1 3.63 17.1 2.535 16.365 3.72 16.38 3.72 16.38 4.905 16.65 5.58 18.435 5.58 18.435 6.615 20.76 8.25 20.25 9.075 19.965 9.18 19.17 9.495 18.675 9.84 18.405 7.17 18.12 4.38 17.025 4.38 12.12 4.38 10.725 4.845 9.585 5.13 8.385 5.13 8.385 6.105 8.055 9.015 10.065 9.825 9.795 10.65 9.795 11.475 9.795 12.285 10.065 15.195 8.055 16.17 8.385 16.17 8.385 16.455 9.585 16.92 10.725 16.92 12.12 16.92 17.025 14.13 18.12 11.46 18.405 11.805 18.675 12.12 19.17 12.225 19.965 13.05 20.25 14.685 20.76 15.72 18.435 16.395 16.65 17.28 16.38 18.465 16.365 17.37 17.1 16.575 17.46 16.035 18.795 16.035 18.795 15.33 20.76 12.63 20.055 12.63 21.585 12.63 22.53 12.615 22.815 12.615 23.13 12.84 23.49 13.44 23.385 20.565 21.795 24 17.31 24 12 24 5.37 18.63 0 12 0Z"/>
+              </svg>
+              Continuar con GitHub
+            </button>
+          </div>
+          
+          <div class="offline-notice" style="display: ${navigator.onLine ? 'none' : 'block'};">
+            📡 Sin conexión - El login estará disponible cuando te conectes
+          </div>
+          
+          <div class="auth-benefits">
+            <h4>✨ Beneficios de crear cuenta:</h4>
+            <ul>
+              <li>☁️ Sincronización automática en todos tus dispositivos</li>
+              <li>📊 Estadísticas avanzadas de progreso</li>
+              <li>🎯 Sistema de objetivos personalizado</li>
+              <li>🏆 Logros y gamificación</li>
+              <li>📱 Notificaciones push personalizadas</li>
+              <li>💾 Backup automático de tu progreso</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
     
     const modalHTML = `
       <div class="modal-overlay active">
@@ -1134,6 +1477,8 @@ class RoadmapApp {
             <button class="modal__close" aria-label="Cerrar modal">×</button>
           </div>
           <div class="modal__content">
+            ${authSection}
+            
             <div class="profile-tabs">
               <button class="profile-tab active" data-tab="info">📝 Información</button>
               <button class="profile-tab" data-tab="stats">📊 Estadísticas</button>
@@ -1150,7 +1495,7 @@ class RoadmapApp {
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="profileEmail">Email:</label>
-                  <input type="email" id="profileEmail" class="form-input" value="${this.userProfile.email}" placeholder="tu@email.com">
+                  <input type="email" id="profileEmail" class="form-input" value="${this.userProfile.email}" placeholder="tu@email.com" ${isLoggedIn ? 'readonly' : ''}>
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="profileBio">Bio:</label>
@@ -1181,6 +1526,7 @@ class RoadmapApp {
               
               <div class="sync-actions">
                 <button class="sync-btn primary" onclick="roadmapApp.saveProfileData()">💾 Guardar Cambios</button>
+                ${isLoggedIn ? '<button class="sync-btn secondary" onclick="roadmapApp.authManager.syncUserData()">☁️ Sincronizar Ahora</button>' : ''}
               </div>
             </div>
             
@@ -1268,6 +1614,13 @@ class RoadmapApp {
     
     // Setup profile tab listeners
     this.setupProfileTabListeners();
+    
+    // Inicializar Google Sign-In si el usuario no está logueado
+    if (!isLoggedIn) {
+      setTimeout(() => {
+        this.authManager.initGoogleAuth();
+      }, 100);
+    }
   }
 
   calculateProfileStats() {
@@ -1382,6 +1735,11 @@ class RoadmapApp {
     this.saveUserProfile();
     this.addToHistory('profile_updated');
     
+    // Sincronizar si está logueado
+    if (this.authManager.isLoggedIn()) {
+      this.authManager.syncUserData();
+    }
+    
     // Show success message
     const button = event.target;
     const originalText = button.textContent;
@@ -1392,6 +1750,11 @@ class RoadmapApp {
       button.textContent = originalText;
       button.style.backgroundColor = '';
     }, 2000);
+  }
+
+  // Mostrar mensaje de "próximamente"
+  showComingSoon(feature) {
+    this.showNotification(`${feature} próximamente`, '🚧 Esta función estará disponible pronto');
   }
 
   // ===========================================
