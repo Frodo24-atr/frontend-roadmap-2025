@@ -2238,28 +2238,38 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Detectar instalación de PWA
   let deferredPrompt;
+  let installButton;
+  
   window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired');
     e.preventDefault();
     deferredPrompt = e;
     
     // Mostrar botón de instalación personalizado
-    const installButton = document.createElement('button');
+    installButton = document.createElement('button');
     installButton.textContent = '📱 Instalar App';
     installButton.className = 'sync-btn primary';
+    installButton.id = 'pwa-install-button';
     installButton.style.cssText = `
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 1000;
       box-shadow: var(--shadow-lg);
+      animation: pulse 2s infinite;
     `;
     
     installButton.addEventListener('click', async () => {
       if (deferredPrompt) {
+        console.log('Showing install prompt');
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
+        console.log('User choice:', outcome);
         if (outcome === 'accepted') {
           console.log('Usuario instaló la PWA');
+          roadmapApp.showNotification('¡Instalación exitosa!', '📱 App instalada correctamente');
+        } else {
+          console.log('Usuario canceló la instalación');
         }
         deferredPrompt = null;
         installButton.remove();
@@ -2267,29 +2277,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     document.body.appendChild(installButton);
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+      if (installButton && installButton.parentNode) {
+        installButton.style.opacity = '0.7';
+      }
+    }, 10000);
   });
   
   // Ocultar botón cuando se instale
-  window.addEventListener('appinstalled', () => {
-    console.log('PWA instalada con éxito');
-    const installButton = document.querySelector('button[textContent="📱 Instalar App"]');
-    if (installButton) {
+  window.addEventListener('appinstalled', (e) => {
+    console.log('PWA instalada con éxito', e);
+    if (installButton && installButton.parentNode) {
       installButton.remove();
     }
+    roadmapApp.showNotification('¡Bienvenido!', '🎉 La app está lista para usar offline');
   });
+  
+  // Detectar si ya está instalada
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('App ya está ejecutándose como PWA');
+  }
 });
-
-// ===========================================
-// SERVICE WORKER REGISTRATION (PWA)
-// ===========================================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}

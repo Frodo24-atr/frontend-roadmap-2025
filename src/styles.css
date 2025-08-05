@@ -1343,6 +1343,34 @@ body {
 }
 
 /* ===========================================
+   PWA INSTALL BUTTON ANIMATION
+=========================================== */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+  }
+  
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+  }
+  
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+  }
+}
+
+#pwa-install-button {
+  transition: all 0.3s ease;
+}
+
+#pwa-install-button:hover {
+  transform: scale(1.1) !important;
+}
+
+/* ===========================================
    RESPONSIVE DESIGN
 =========================================== */
 @media (max-width: 768px) {
